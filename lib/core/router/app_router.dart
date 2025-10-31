@@ -12,7 +12,7 @@ class AppRouter {
   // ve değiştirilemeyen (final) bir GoRouter nesnesi tanımlıyoruz.
   static final GoRouter router = GoRouter(
     // 4. Uygulama ilk açıldığında hangi adrese yönleneceğini belirtiyoruz.
-    initialLocation: '/splash',
+    initialLocation: '/login',
 
     // 5. 'routes' listesi, uygulamamızın tüm adres haritasıdır.
     routes: <GoRoute>[

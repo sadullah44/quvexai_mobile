@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quvexai_mobile/core/theme/app_theme.dart';
 import 'package:quvexai_mobile/core/router/app_router.dart'; // 1. Kendi haritamızı içe aktarıyoruz
 
 void main() {
@@ -23,9 +24,9 @@ class MyApp extends StatelessWidget {
       // Uygulamamıza "Navigasyon haritan budur" diyoruz.
       routerConfig: AppRouter.router,
 
-      // 7. Tema (Görünüm) ayarları buraya gelecek
-      // theme: ...,
-      // darkTheme: ...,
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system,
     );
   }
 }
