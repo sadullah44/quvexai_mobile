@@ -9,7 +9,7 @@ class AppTheme {
     primaryColor: primaryColor,
     fontFamily: 'Poppins',
     scaffoldBackgroundColor: Colors.white,
-    appBarTheme: const AppBarTheme(color: primaryColor, elevation: 0),
+    appBarTheme: const AppBarTheme(backgroundColor: primaryColor, elevation: 0),
     colorScheme: ColorScheme.light(
       primary: primaryColor,
       secondary: secondaryColor,
@@ -21,7 +21,7 @@ class AppTheme {
     primaryColor: primaryColor,
     fontFamily: 'Poppins',
     scaffoldBackgroundColor: const Color(0xFF121212),
-    appBarTheme: const AppBarTheme(color: Colors.black),
+    appBarTheme: const AppBarTheme(backgroundColor: Colors.black),
     colorScheme: ColorScheme.dark(
       primary: primaryColor,
       secondary: secondaryColor,
