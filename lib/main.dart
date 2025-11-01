@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:quvexai_mobile/core/theme/app_theme.dart';
 import 'package:quvexai_mobile/core/router/app_router.dart'; // 1. Kendi haritamızı içe aktarıyoruz
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// YENİ HALİ (DOĞRU)
 void main() {
-  // 2. Uygulamayı başlatan ana fonksiyon
-  runApp(const MyApp());
+  // Riverpod'ı (ana şalteri) tüm uygulamanın
+  // etrafına sararak çalıştırıyoruz.
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
