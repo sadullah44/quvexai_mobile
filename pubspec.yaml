@@ -73,6 +73,7 @@ flutter:
 
   assets:
     - assets/fonts/images/logo.png
+    - assets/mock/
 
   fonts:
     - family: Poppins
