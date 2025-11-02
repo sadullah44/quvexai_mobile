@@ -34,4 +34,39 @@ class AuthNotifier extends Notifier<AuthState> {
 
     state = AuthState.initial();
   }
+
+  /// REGISTER (KAYIT OL) FONKSİYONU
+  /// Arayüz (RegisterScreen) bu fonksiyonu çağıracak.
+  Future<void> register(String email, String password) async {
+    // try-catch bloğu (API hata verebilir)
+    try {
+      // ADIM A: YÜKLENİYOR IŞIĞINI YAK
+      // Arayüze "Bekle" diyoruz.
+      state = state.copyWith(isLoading: true, errorMessage: null);
+
+      // ADIM B: "ARACI"YI ÇAĞIR
+      // (G3'te yazdığımız 'authRepositoryProvider'ı oku
+      // ve 'register' metodunu çağır)
+      final token = await ref
+          .read(authRepositoryProvider)
+          .register(email, password);
+
+      // (Bizim sahte 'DataSource'umuz 1s bekleyip,
+      // "taken@test.com" hatasını kontrol edip,
+      // yeni bir token döndürecek)
+
+      // ADIM C: BAŞARILI DURUM (TOKEN IŞIĞINI YAK & KAYDET)
+      // Giriş (Login) ile aynı işlemi yap:
+
+      // 1. Token'ı Hafızaya Kaydet (G3, Görev 4)
+      await ref.read(storageServiceProvider).writeToken(token);
+
+      // 2. "Gösterge Paneli"ni Güncelle (Kullanıcıyı giriş yapmış say)
+      state = state.copyWith(isLoading: false, token: token);
+    } catch (e) {
+      // ADIM D: HATA DURUMU (MOTOR ARIZA IŞIĞINI YAK)
+      // (örn: "Bu e-posta zaten kullanımda")
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+    }
+  }
 }

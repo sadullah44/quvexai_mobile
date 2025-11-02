@@ -50,11 +50,33 @@ class ProductCard extends StatelessWidget {
             child: Image.network(
               item.imageUrl,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) =>
-                  const Center(child: Icon(Icons.image_not_supported)),
-              loadingBuilder: (context, child, progress) => progress == null
-                  ? child
-                  : const Center(child: CircularProgressIndicator()),
+
+              // Resim yüklenirken... (Arkadaşınız bunu eklemiş olabilir)
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
+                return const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                );
+              },
+
+              // --- 👇👇👇 LÜTFEN BU KISMI EKLEYİN VEYA GÜNCELLEYİN 👇👇👇 ---
+              // Resim yüklenirken HATA ALIRSA...
+              errorBuilder: (context, error, stackTrace) {
+                // --- HATA AYIKLAMA KODU ---
+                // Hatayı terminale/konsola YAZDIR
+                print('RESİM YÜKLEME HATASI (${item.name}): $error');
+                // --- HATA AYIKLAMA KODU SONU ---
+
+                // Hata ikonunu kırmızı renkte göster
+                return const Center(
+                  child: Icon(
+                    Icons.image_not_supported,
+                    color: Colors.red,
+                    size: 40,
+                  ),
+                );
+              },
+              // --- 👆👆👆 GÜNCELLEME SONU 👆👆👆 ---
             ),
           ),
           Padding(

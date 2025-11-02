@@ -4,7 +4,7 @@
         "qr_code": "QR-12345-X1",
         "quantity": 15,
         "last_updated": "2025-10-28T10:30:00Z",
-        "image_url": "https://placehold.co/600x400/50E3C2/ffffff?text=Laptop+X1"
+        "image_url": "https://placehold.co/600x400/50E3C2/ffffff.png?text=Laptop+X1"
     },
     {
         "id": "p2",
@@ -12,7 +12,7 @@
         "qr_code": "QR-67890-CHAIR",
         "quantity": 45,
         "last_updated": "2025-10-27T15:00:00Z",
-        "image_url": "https://placehold.co/600x400/4A90E2/ffffff?text=Ofis+Sandalyesi"
+        "image_url": "https://placehold.co/600x400/4A90E2/ffffff.png?text=Ofis+Sandalyesi"
     },
     {
         "id": "p3",
@@ -20,7 +20,7 @@
         "qr_code": "QR-11223-KBD",
         "quantity": 120,
         "last_updated": "2025-10-28T11:00:00Z",
-        "image_url": "https://placehold.co/600x400/E24A4A/ffffff?text=Klavye+Seti"
+        "image_url": "https://placehold.co/600x400/E24A4A/ffffff.png?text=Klavye+Seti"
     },
     {
         "id": "p4",
@@ -28,6 +28,6 @@
         "qr_code": "QR-44556-PROJ",
         "quantity": 5,
         "last_updated": "2025-10-25T09:15:00Z",
-        "image_url": "https://placehold.co/600x400/F5A623/ffffff?text=Projeksiyon"
+        "image_url": "https://placehold.co/600x400/F5A623/ffffff.png?text=Projeksiyon"
     }
 ]
