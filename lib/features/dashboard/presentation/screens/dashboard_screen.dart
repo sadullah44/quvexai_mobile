@@ -2,60 +2,71 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-// G3'te yazdığımız "Motor Beyni"ni import ediyoruz
 import 'package:quvexai_mobile/features/auth/presentation/providers/auth_provider.dart';
 
-// 1. Ekranı 'Stateless'tan 'ConsumerWidget'a dönüştürdük
-//    (Çünkü 'ref' aracına ihtiyacımız var)
-class DashboardScreen extends ConsumerWidget {
+import 'package:quvexai_mobile/features/dashboard/presentation/tabs/inventory_tab.dart';
+import 'package:quvexai_mobile/features/dashboard/presentation/tabs/qr_tab.dart';
+import 'package:quvexai_mobile/features/dashboard/presentation/tabs/profile_tab.dart';
+
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // 2. Çıkış yaptığımızda (token=null) Login'e geri dönmek
-    //    için 'ref.listen' kullanıyoruz
-    // --- GÜNCELLEME BAŞLANGICI ---
-    // 'logout' olayının *anını* yakalamak için daha sağlam bir kontrol ekliyoruz.
-    ref.listen(authProvider, (previous, next) {
-      // 'previous' (önceki durum) null değilse ve bir token'ı varsa
-      // (yani 'giriş yapmış' durumdayken)
-      final wasLoggedIn = previous != null && previous.token != null;
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
 
-      // 'next' (yeni durum) token'ı null ise
-      // (yani 'çıkış yapmış' duruma geçtiyse)
-      final isLoggedOut = next.token == null;
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  int _selectedIndex = 0;
 
-      // Eğer "giriş yapmış" durumdan "çıkış yapmış" duruma bir *GEÇİŞ* olduysa:
-      if (wasLoggedIn && isLoggedOut) {
-        // Token ışığı söndü! Login'e git.
-        context.go('/login');
-      }
+  static const List<Widget> _widgetOptions = <Widget>[
+    InventoryTab(),
+    QrTab(),
+    ProfileTab(),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.listen(authProvider, (previous, next) {
+        final wasLoggedIn = previous != null && previous.token != null;
+        final isLoggedOut = next.token == null;
+        if (wasLoggedIn && isLoggedOut) {
+          context.go('/login');
+        }
+      });
     });
-    // --- GÜNCELLEME SONU ---
+  }
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Ana Ekran - Başarıyla Giriş Yaptınız!'),
-            const SizedBox(height: 40),
-
-            // 3. GEÇİCİ ÇIKIŞ YAP BUTONU
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-              ),
-              child: const Text('Çıkış Yap (TEST)'),
-              onPressed: () {
-                // 4. G3'te yazdığımız 'logout' mantığını çağırıyoruz
-                //    Bu, token'ı hafızadan siler ve state'i sıfırlar.
-                ref.read(authProvider.notifier).logout();
-              },
-            ),
-          ],
-        ),
+      body: IndexedStack(index: _selectedIndex, children: _widgetOptions),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.inventory_2_outlined),
+            label: 'Envanter',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.qr_code_scanner),
+            label: 'QR Tara',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profil',
+          ),
+        ],
       ),
     );
   }

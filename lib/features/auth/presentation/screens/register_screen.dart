@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -44,7 +45,6 @@ class RegisterScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Şifre Tekrarı
                 TextFormField(
                   obscureText: true,
                   decoration: const InputDecoration(
@@ -61,6 +61,27 @@ class RegisterScreen extends StatelessWidget {
                     onPressed: () {},
                     child: const Text("Kayıt Ol"),
                   ),
+                ),
+
+                const SizedBox(height: 16),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Zaten hesabın var mı? "),
+                    TextButton(
+                      onPressed: () {
+                        context.go('/login');
+                      },
+                      child: const Text(
+                        "Giriş Yap",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blueAccent,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
