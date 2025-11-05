@@ -1,49 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import 'package:go_router/go_router.dart'; // Yönlendirme için eklendi
+import 'package:quvexai_mobile/features/auth/presentation/providers/auth_provider.dart'; // Auth state'i dinlemek için eklendi
 
-// 1. GEREKLİ İMPORTLARI EKLEYELİM
-// "Envanter Beyni"ni (G5'te yazdığınız) import ediyoruz
-import 'package:quvexai_mobile/features/inventory/presentation/providers/inventory_provider.dart';
-// "Giriş Beyni"ni (G3'te yazdığınız) import ediyoruz
-import 'package:quvexai_mobile/features/auth/presentation/providers/auth_provider.dart';
-
-// Arkadaşınızın (Kişi 2) G5'te yazdığı (veya yazması gerektiği) Sekmeler
-import 'package:quvexai_mobile/features/dashboard/presentation/tabs/inventory_tab.dart';
-import 'package:quvexai_mobile/features/dashboard/presentation/tabs/qr_tab.dart';
-// import 'package:quvexai_mobile/features/dashboard/presentation/tabs/profile_tab.dart'; // Bu dosya yokmuş
-
-// 2. EKSİK OLAN "PROFILE_TAB" YERİNE GEÇİCİ BİR TANE OLUŞTURALIM
-// (Arkadaşınız bu dosyayı yapmayı unutmuş, biz burada geçici bir tane yapalım)
-class TempProfileTab extends ConsumerWidget {
-  const TempProfileTab({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // 3. ÇIKIŞ YAP DİNLEYİCİSİNİ BURAYA, DOĞRU YERE ALALIM
-    // (Daha önce initState'te yanlış yerdeydi)
-    ref.listen(authProvider, (previous, next) {
-      final wasLoggedIn = previous != null && previous.token != null;
-      final isLoggedOut = next.token == null;
-      if (wasLoggedIn && isLoggedOut) {
-        context.go('/login');
-      }
-    });
-
-    // 4. ÇIKIŞ YAP BUTONU
-    return Center(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-        child: const Text('Çıkış Yap'),
-        onPressed: () {
-          ref.read(authProvider.notifier).logout();
-        },
-      ),
-    );
-  }
-}
-
-// ----------------- ANA DASHBOARD KODU -----------------
+// 1. GÜNCELLEME: Sildiğimiz 'inventory_tab.dart' yerine
+// az önce oluşturduğumuz 'test_list_tab.dart' import edildi.
+import 'package:quvexai_mobile/features/dashboard/presentation/tabs/test_list_tab.dart';
+import 'package:quvexai_mobile/features/dashboard/presentation/tabs/profile_tab.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -53,29 +16,22 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0; // 0 = Testler, 1 = Profil
 
-  // 5. WIDGET LİSTESİNİ GÜNCELLEYELİM
-  // (Arkadaşınızın 'profile_tab.dart'ı yerine 'TempProfileTab'ı kullanalım)
-  static final List<Widget> _widgetOptions = <Widget>[
-    const InventoryTab(),
-    const QrTab(), // (Umarım arkadaşınız bunu yapmıştır, yoksa 'Text' ile değiştirin)
-    const TempProfileTab(), // (Geçici 'Profil' sekmemiz)
+  // 2. GÜNCELLEME: Widget listesi güncellendi.
+  // 'InventoryTab' yerine 'TestlerTab' geldi.
+  static const List<Widget> _widgetOptions = <Widget>[
+    TestlerTab(),
+    ProfileTab(),
   ];
 
   @override
   void initState() {
     super.initState();
 
-    // 6. HATALI 'initState'İ DÜZELTELİM
-    // --- DOĞRU KOD BUDUR ---
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      // "Envanter Beyni"ne ('inventoryProvider') ulaş ve
-      // 'fetchInventory' (veriyi çek) fonksiyonunu tetikle.
-      // EKSİK OLAN KRİTİK PARÇA BUYDU.
-      ref.read(inventoryProvider.notifier).fetchInventory();
-    });
-    // --- DÜZELTME SONU ---
+    // 3. GÜNCELLEME: 'fetchInventory()' tetikleyicisi kaldırıldı.
+    // Artık 'initState' boş (veya 2. Hafta'da testleri
+    // çekmek için yeni bir tetikleyici eklenebilir).
   }
 
   void _onItemTapped(int index) {
@@ -86,22 +42,37 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // 4. GÜNCELLEME: AppBar başlığı "Testler" veya "Profil"
+    // olarak değişecek şekilde ayarlandı.
+    final titles = ['Testlerim', 'Profil'];
+
+    // --- YENİ DÜZELTME: Çıkış Dinleyicisini Buraya Taşıma ---
+    // 'ProfileTab' yerine 'DashboardScreen' (her zaman aktif olan ana ekran)
+    // 'authProvider'ı dinler.
+    ref.listen(authProvider, (previousState, newState) {
+      // Önceki durumun "giriş yapmış" olduğunu kontrol et
+      final wasLoggedIn = previousState != null && previousState.token != null;
+
+      // Yeni durumun "çıkış yapmış" olduğunu kontrol et
+      final isLoggedOut = newState.token == null;
+
+      // Eğer "giriş yapmış" durumdan "çıkış yapmış" duruma bir GEÇİŞ olduysa:
+      if (wasLoggedIn && isLoggedOut) {
+        // Güvenli bir şekilde 'LoginScreen'e yönlendir.
+        context.go('/login');
+      }
+    });
+    // --- DÜZELTME SONU ---
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Envanter Sistemi'),
-        // 7. (Alternatif) Çıkış butonunu buraya da koyabilirdik,
-        //    ancak sekme yapısı daha temiz.
-      ),
+      appBar: AppBar(title: Text(titles[_selectedIndex])),
       body: IndexedStack(index: _selectedIndex, children: _widgetOptions),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
+          // 5. GÜNCELLEME: Sekme adı "Envanter"den "Testler"e değiştirildi.
           BottomNavigationBarItem(
-            icon: Icon(Icons.inventory_2_outlined),
-            label: 'Envanter',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.qr_code_scanner),
-            label: 'QR Tara',
+            icon: Icon(Icons.psychology_outlined), // Yeni ikon
+            label: 'Testler',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
