@@ -5,28 +5,22 @@ import 'package:quvexai_mobile/features/auth/presentation/screens/login_screen.d
 import 'package:quvexai_mobile/features/auth/presentation/screens/register_screen.dart';
 import 'package:quvexai_mobile/features/auth/presentation/screens/splash_screen.dart';
 import 'package:quvexai_mobile/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:quvexai_mobile/features/dashboard/presentation/screens/test_detail_screen.dart';
+import 'package:quvexai_mobile/features/tests/data/models/test_model.dart';
+import 'package:quvexai_mobile/features/tests/presentation/screens/test_list_screen.dart'; // ✅ EKLENDİ
 
-// 2. Rota sınıfımızı oluşturuyoruz
 class AppRouter {
-  // 3. 'router' adında, tüm uygulama tarafından erişilebilen (static)
-  // ve değiştirilemeyen (final) bir GoRouter nesnesi tanımlıyoruz.
   static final GoRouter router = GoRouter(
-    // 4. Uygulama ilk açıldığında hangi adrese yönleneceğini belirtiyoruz.
     initialLocation: '/splash',
 
-    // 5. 'routes' listesi, uygulamamızın tüm adres haritasıdır.
     routes: <GoRoute>[
-      // 6. Splash Ekranı Rotası
       GoRoute(
-        path: '/splash', // Web adresi gibi 'path' (yol) tanımlıyoruz
+        path: '/splash',
         builder: (BuildContext context, GoRouterState state) {
-          // Bu adrese gidildiğinde hangi ekranın (widget)
-          // inşa edileceğini (build) söylüyoruz.
           return const SplashScreen();
         },
       ),
 
-      // 7. Login Ekranı Rotası
       GoRoute(
         path: '/login',
         builder: (BuildContext context, GoRouterState state) {
@@ -34,7 +28,6 @@ class AppRouter {
         },
       ),
 
-      // 8. Register Ekranı Rotası
       GoRoute(
         path: '/register',
         builder: (BuildContext context, GoRouterState state) {
@@ -42,11 +35,25 @@ class AppRouter {
         },
       ),
 
-      // 9. Dashboard Ekranı Rotası
       GoRoute(
         path: '/dashboard',
         builder: (BuildContext context, GoRouterState state) {
           return const DashboardScreen();
+        },
+      ),
+
+      GoRoute(
+        path: '/tests',
+        builder: (BuildContext context, GoRouterState state) {
+          return const TestListScreen();
+        },
+      ),
+
+      GoRoute(
+        path: '/tests/:id',
+        builder: (BuildContext context, GoRouterState state) {
+          final test = state.extra as TestModel;
+          return TestDetailScreen(test: test);
         },
       ),
     ],
