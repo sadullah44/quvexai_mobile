@@ -5,7 +5,7 @@ import 'package:quvexai_mobile/features/auth/presentation/screens/login_screen.d
 import 'package:quvexai_mobile/features/auth/presentation/screens/register_screen.dart';
 import 'package:quvexai_mobile/features/auth/presentation/screens/splash_screen.dart';
 import 'package:quvexai_mobile/features/dashboard/presentation/screens/dashboard_screen.dart';
-import 'package:quvexai_mobile/features/dashboard/presentation/screens/test_detail_screen.dart';
+import 'package:quvexai_mobile/features/tests/presentation/screens/test_detail_screen.dart';
 import 'package:quvexai_mobile/features/tests/data/models/test_model.dart';
 import 'package:quvexai_mobile/features/tests/presentation/screens/test_list_screen.dart'; // ✅ EKLENDİ
 

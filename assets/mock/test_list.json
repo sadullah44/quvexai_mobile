@@ -1,0 +1,25 @@
+[{
+        "id": "t1-cocukluk-travma",
+        "name": "Çocukluk Travmaları Testi",
+        "category": "Kişisel Gelişim",
+        "estimated_time_mins": 15,
+        "difficulty": "Orta",
+        "description": "Bu test, çocukluk döneminde yaşanan olumsuz deneyimlerin yetişkinlikteki olası yansımalarını keşfetmek için tasarlanmıştır."
+    },
+    {
+        "id": "t2-baglanma-stilleri",
+        "name": "Bağlanma Stilleri Testi",
+        "category": "İlişkiler",
+        "estimated_time_mins": 10,
+        "difficulty": "Kolay",
+        "description": "Yakın ilişkilerinizdeki bağlanma stilinizi (Güvenli, Kaygılı, Kaçıngan) belirlemenize yardımcı olur."
+    },
+    {
+        "id": "t3-stres-yonetimi",
+        "name": "Stres Yönetimi Ölçeği",
+        "category": "İş Hayatı",
+        "estimated_time_mins": 12,
+        "difficulty": "Orta",
+        "description": "Günlük yaşamdaki stres kaynaklarınızla ne kadar etkili başa çıktığınızı ölçer."
+    }
+]
