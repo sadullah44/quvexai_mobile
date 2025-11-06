@@ -8,6 +8,9 @@ import 'package:quvexai_mobile/features/dashboard/presentation/screens/dashboard
 import 'package:quvexai_mobile/features/tests/presentation/screens/test_detail_screen.dart';
 import 'package:quvexai_mobile/features/tests/data/models/test_model.dart';
 import 'package:quvexai_mobile/features/tests/presentation/screens/test_list_screen.dart'; // ✅ EKLENDİ
+// (Diğer import'larınızın yanına)
+// Henüz oluşturulmadı ama oluşturulacak (Kişi 2 görevi)
+import 'package:quvexai_mobile/features/test_session/presentation/screens/test_session_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -54,6 +57,20 @@ class AppRouter {
         builder: (BuildContext context, GoRouterState state) {
           final test = state.extra as TestModel;
           return TestDetailScreen(test: test);
+        },
+      ),
+      GoRoute(
+        path: '/test-session/:testId', // Test ID'sini 'path'ten (adresten) alır
+        builder: (BuildContext context, GoRouterState state) {
+          // 'TestDetailScreen'den (Kişi 2) 'extra' ile gönderilen
+          // Testin Adını (AppBar'da göstermek için) yakalıyoruz.
+          final testName = state.extra as String;
+
+          // Adres çubuğundan gelen 'testId'yi alıyoruz
+          final testId = state.pathParameters['testId']!;
+
+          // Bu bilgileri 'TestSessionScreen'e (Kişi 2'nin oluşturacağı ekran) iletiyoruz.
+          return TestSessionScreen(testId: testId, testName: testName);
         },
       ),
     ],
