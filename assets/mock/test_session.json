@@ -1,0 +1,35 @@
+[{
+        "id": "q1",
+        "question_type": "likert_5",
+        "text": "Geçmişimdeki olaylar yüzünden insanlara güvenmekte zorlanırım.",
+        "answers": [
+            { "id": "a1", "text": "Kesinlikle Katılmıyorum" },
+            { "id": "a2", "text": "Katılmıyorum" },
+            { "id": "a3", "text": "Kararsızım" },
+            { "id": "a4", "text": "Katılıyorum" },
+            { "id": "a5", "text": "Kesinlikle Katılıyorum" }
+        ]
+    },
+    {
+        "id": "q2",
+        "question_type": "likert_5",
+        "text": "Yakın ilişkiler kurmaktan (bağlanmaktan) korkarım.",
+        "answers": [
+            { "id": "a1", "text": "Kesinlikle Katılmıyorum" },
+            { "id": "a2", "text": "Katılmıyorum" },
+            { "id": "a3", "text": "Kararsızım" },
+            { "id": "a4", "text": "Katılıyorum" },
+            { "id": "a5", "text": "Kesinlikle Katılıyorum" }
+        ]
+    },
+    {
+        "id": "q3",
+        "question_type": "multiple_choice",
+        "text": "Beklenmedik bir ses duyduğumda kolayca irkilirim.",
+        "answers": [
+            { "id": "a1", "text": "Nadiren" },
+            { "id": "a2", "text": "Bazen" },
+            { "id": "a3", "text": "Sık sık" }
+        ]
+    }
+]
