@@ -1,47 +1,73 @@
-// lib/features/tests/presentation/providers/test_provider.dart
+// 1. Gerekli importlar
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:quvexai_mobile/features/tests/data/datasources/mock_test_data_source.dart';
-import 'package:quvexai_mobile/features/tests/data/models/test_model.dart';
+// "Gösterge Panelimiz" (Canvas'taki dosyanız)
+import 'package:quvexai_mobile/features/tests/presentation/providers/test_state.dart';
+// "Aracımız" (Adım 9'da yaptık)
+import 'package:quvexai_mobile/features/tests/data/repositories/test_repository.dart';
 
-class TestState {
-  final bool isLoading;
-  final List<TestModel> tests;
-  final String? errorMessage;
+// -------------------------------------------------------------------
+// PARÇA 1: Provider (Arayüzün Erişim Noktası)
+// -------------------------------------------------------------------
 
-  TestState({required this.isLoading, required this.tests, this.errorMessage});
+/// Bu, Arayüzün (UI) 'TestNotifier'a erişmek için kullanacağı
+/// "anahtar yuvasıdır". Arkadaşınızın (Kişi 2) 'TestlerTab' arayüzü
+/// bu provider'ı 'watch' (izleyecek).
+final testProvider = NotifierProvider<TestNotifier, TestState>(
+  () => TestNotifier(),
+);
 
-  factory TestState.initial() =>
-      TestState(isLoading: false, tests: [], errorMessage: null);
+// -------------------------------------------------------------------
+// PARÇA 2: Notifier (Testler Beyni / Yönetici)
+// -------------------------------------------------------------------
 
-  TestState copyWith({
-    bool? isLoading,
-    List<TestModel>? tests,
-    String? errorMessage,
-  }) {
-    return TestState(
-      isLoading: isLoading ?? this.isLoading,
-      tests: tests ?? this.tests,
-      errorMessage: errorMessage ?? this.errorMessage,
-    );
+/// Bu sınıf, 'TestState' gösterge panelini aktif olarak yöneten beyindir.
+class TestNotifier extends Notifier<TestState> {
+  // --- 1. Başlangıç Durumunu Ayarlama ---
+
+  @override
+  TestState build() {
+    // 'Provider' ilk kez okunduğunda (veya 'ref.watch' ilk kez çağrıldığında),
+    // "Gösterge Paneli"ni varsayılan (boş) haliyle başlatır.
+    return TestState.initial();
   }
-}
 
-class TestNotifier extends StateNotifier<TestState> {
-  final TestApiDataSource dataSource;
+  // --- 2. Ana İşlev (Action) ---
 
-  TestNotifier(this.dataSource) : super(TestState.initial());
-
+  /// [fetchTests] - Test verisini API'den getirir.
+  /// Arkadaşınızın (Kişi 2) 'TestlerTab' arayüzü ilk açıldığında
+  /// bu fonksiyonu çağırması gerekecek.
   Future<void> fetchTests() async {
-    state = state.copyWith(isLoading: true);
+    // 'try-catch' bloğu (API hataya düşebilir)
     try {
-      final tests = await dataSource.getTests();
-      state = state.copyWith(isLoading: false, tests: tests);
+      // ADIM A: YÜKLENİYOR IŞIĞINI YAK
+      // Arayüze "Bekle, veriyi çekiyorum" diyoruz.
+      // (Eski hataları da temizliyoruz)
+      state = state.copyWith(isLoading: true, errorMessage: null);
+
+      // ADIM B: "ARACI"YI ÇAĞIR (Adım 9 Bağlantısı)
+      // Riverpod 'ref' aracını kullanarak, "Aracı Fabrikası"ndan
+      // ('testRepositoryProvider') bir 'TestRepository' istiyoruz
+      // ve 'getTests' metodunu çağırıyoruz.
+      final testsList = await ref.read(testRepositoryProvider).getTests();
+
+      // (Bizim "Veri Hattımız" (Dio) API'ye gidecek,
+      // "Token"ı ekleyecek, JSON'u alacak, "DataSource"
+      // "Tercüman"ı (Model) çağıracak ve 'List<TestModel>'
+      // olarak buraya döndürecek)
+
+      // ADIM C: BAŞARILI DURUM (Veri Listesi Işığını Yak)
+      // "Gösterge Paneli"ni güncelliyoruz:
+      // - isLoading ışığını 'false' (söndür) yapıyoruz.
+      // - 'tests' (test listesi) alanını, 'Aracı'dan gelen 'testsList' ile dolduruyoruz.
+      state = state.copyWith(isLoading: false, tests: testsList);
     } catch (e) {
+      // ADIM D: HATA DURUMU (Motor Arıza Işığını Yak)
+      // 'Repository' veya 'DataSource' bir hata "fırlatırsa" (throw), kod buraya düşer.
+
+      // "Gösterge Paneli"ni güncelliyoruz:
+      // - isLoading ışığını 'false' (söndür) yapıyoruz.
+      // - 'errorMessage' ışığını (arıza mesajı) gelen hata 'e' ile yakıyoruz.
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
 }
-
-final testProvider = StateNotifierProvider<TestNotifier, TestState>(
-  (ref) => TestNotifier(TestApiDataSource()),
-);

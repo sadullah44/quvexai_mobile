@@ -12,9 +12,6 @@ class AnswerModel extends Equatable {
   // 3. Standart Kurucu (Constructor)
   const AnswerModel({required this.id, required this.text});
 
-  // 4. "Fabrika" Kurucusu (Factory Constructor) - JSON TERCÜMANI
-  /// API'den gelen 'Map<String, dynamic>' (çözülmüş JSON) verisini
-  /// alır ve onu 'AnswerModel' nesnesine dönüştürür.
   factory AnswerModel.fromJson(Map<String, dynamic> json) {
     return AnswerModel(
       // JSON'daki 'id' anahtarını oku -> 'id' alanına ata

@@ -1,78 +1,69 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:quvexai_mobile/features/tests/data/models/test_model.dart';
+import 'package:dio/dio.dart'; // Dio (GET, POST)
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // Riverpod
+import 'package:quvexai_mobile/core/network/dio_client.dart'; // Bizim "Ana Veri Hattımız"
+import 'package:quvexai_mobile/features/tests/data/models/test_model.dart'; // Bizim "JSON Tercümanımız"
 
-/// Bu sınıf API yerine mock veri sağlıyor
+/// Bu sınıf, 'Test' verisi için *gerçek* API ile konuşan
+/// "Veri Kaynağı"dır.
 class TestApiDataSource {
-  TestApiDataSource();
+  // 2. BAĞIMLILIK:
+  // Bu 'Kaynak', çalışmak için 'Dio' (Ana Veri Hattı) istemcisine ihtiyaç duyar.
+  final Dio _dio;
 
+  // 3. BAĞIMLILIK ENJEKSİYONU (Constructor):
+  // Bu 'Dio' istemcisini dışarıdan alır.
+  TestApiDataSource(this._dio);
+
+  /// [getTests] - API'den tüm testlerin listesini çeker.
   Future<List<TestModel>> getTests() async {
-    await Future.delayed(
-      const Duration(seconds: 1),
-    ); // API gecikmesi simülasyonu
+    try {
+      // 4. ADIM: GERÇEK API ÇAĞRISI
+      // "Ana Veri Hattı"nı ('_dio') kullanarak '/tests' endpoint'ine
+      // bir GET isteği yap.
+      // (Bizim 'AuthInterceptor'ımız bu isteğe 'token'ı otomatik ekleyecek)
+      final response = await _dio.get('/tests');
 
-    final mockTests = [
-      TestModel(
-        id: '1',
-        name: 'Flutter Başlangıç Testi',
-        category: 'Mobil Geliştirme',
-        difficulty: 'Kolay',
-        estimatedTimeMins: 10,
-        description:
-            'Bu test, Flutter temel bilgilerini ölçmek için hazırlanmıştır.',
-        questions: [
-          Question(
-            id: 'q1',
-            question: 'Flutter nedir?',
-            options: [
-              'Bir oyun motoru',
-              'Bir mobil framework',
-              'Bir veritabanı',
-              'Bir programlama dili',
-            ],
-            answer: 'Bir mobil framework',
-          ),
-          Question(
-            id: 'q2',
-            question: 'StatelessWidget ne zaman kullanılır?',
-            options: [
-              'Durum gerekmiyorsa',
-              'Her zaman',
-              'Sadece form yaparken',
-              'Hiçbir zaman',
-            ],
-            answer: 'Durum gerekmiyorsa',
-          ),
-        ],
-      ),
-      TestModel(
-        id: '2',
-        name: 'Veri Yapıları ve Algoritmalar',
-        category: 'Bilgisayar Bilimi',
-        difficulty: 'Orta',
-        estimatedTimeMins: 20,
-        description: 'Algoritma ve veri yapıları bilgisini ölçer.',
-        questions: [
-          Question(
-            id: 'q1',
-            question: 'En hızlı arama yöntemi hangisidir?',
-            options: ['Linear Search', 'Binary Search', 'Bubble Sort', 'DFS'],
-            answer: 'Binary Search',
-          ),
-          Question(
-            id: 'q2',
-            question: 'Stack veri yapısında hangi işlem LIFO’ya örnektir?',
-            options: ['Push', 'Pop', 'Enqueue', 'Dequeue'],
-            answer: 'Pop',
-          ),
-        ],
-      ),
-    ];
+      // 5. ADIM: JSON ÇÖZME (DECODE)
+      // Dio, gelen JSON listesini otomatik olarak 'List<dynamic>'
+      // (içinde 'Map'ler olan) bir listeye çevirir.
+      final List<dynamic> jsonList = response.data as List<dynamic>;
 
-    return mockTests;
+      // 6. ADIM: "TERCÜMAN"I (MODEL) KULLANMA
+      // 'jsonList' (çözülmüş liste) üzerinde 'map' (dönüştürme) işlemi yap.
+      // Listedeki *her bir* 'json' nesnesini
+      // 'TestModel.fromJson' "tercümanına" gönder.
+      // Sonuç olarak 'List<TestModel>' (Test Modeli Listesi) elde et.
+      return jsonList.map((json) {
+        return TestModel.fromJson(json as Map<String, dynamic>);
+      }).toList();
+    } on DioException catch (e) {
+      // 7. ADIM: HATA YÖNETİMİ
+      // Eğer 'Dio' (API) bir hata verirse (örn: 404, 500, veya internet yok),
+      // bu hatayı yakala ve daha anlaşılır bir hata fırlat.
+      print('TestApiDataSource Hata: $e');
+      throw Exception('Testler API\'den alınamadı: ${e.message}');
+    } catch (e) {
+      // Beklenmedik bir hata olursa (örn: JSON 'tercüme' hatası)
+      print('TestApiDataSource Bilinmeyen Hata: $e');
+      throw Exception('Testler işlenirken bilinmeyen bir hata oluştu: $e');
+    }
   }
+
+  // (Buraya gelecekte getTestDetail(String id) fonksiyonu eklenecek)
 }
 
-/// Riverpod provider
+// --- Riverpod Provider ---
+
+/// Bu "sağlayıcı", Riverpod'a TestApiDataSource sınıfını
+/// nasıl "inşa edeceğini" (oluşturacağını) öğreten "fabrika" tarifidir.
 final testApiDataSourceProvider = Provider<TestApiDataSource>((ref) {
-  return TestApiDataSource();
+  // 1. ADIM: Bağımlılığı (Ana Veri Hattını) al
+  // Riverpod'a "Bana 'dioClientProvider' fabrikasının
+  // ürettiği yapılandırılmış 'Dio' istemcisini ver" diyoruz.
+  final dio = ref.read(dioClientProvider);
+
+  // 2. ADIM: Veri Kaynağı'nı (DataSource) inşa et
+  // Aldığımız 'dio' istemcisini, 'TestApiDataSource'un
+  // kurucusuna (constructor) "enjekte ediyoruz".
+  return TestApiDataSource(dio);
 });

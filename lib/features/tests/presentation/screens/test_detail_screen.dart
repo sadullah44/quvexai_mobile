@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:go_router/go_router.dart'; // <-- ekle
 import 'package:quvexai_mobile/features/tests/data/models/test_model.dart';
 
+/// Test detay ekranı
 class TestDetailScreen extends StatelessWidget {
   final TestModel test;
 
@@ -50,7 +51,6 @@ class TestDetailScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 18),
                 ),
                 onPressed: () {
-                  // TestModel objesini extra olarak gönderiyoruz
                   context.push('/test-session/${test.id}', extra: test);
                 },
               ),

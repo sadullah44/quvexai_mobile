@@ -23,7 +23,7 @@ class QuestionModel extends Equatable {
   });
 
   // 6. "Fabrika" Kurucusu (Factory Constructor) - JSON TERCÜMANI
-  /// API'den gelen 'Map<String, dynamic>' (çözülmüş JSON) verisini
+
   /// alır ve onu 'QuestionModel' nesnesine dönüştürür.
   factory QuestionModel.fromJson(Map<String, dynamic> json) {
     // 7. AŞAMA 1: 'answers' listesini (iç içe JSON) "tercüme et"

@@ -35,7 +35,6 @@ class TestSessionRepository {
     }
   }
 
-  // TODO: MADDE 3
   // Burası, 'submitTest' (Cevapları Gönder) fonksiyonunun
   // ekleneceği yer olacak.
 }
