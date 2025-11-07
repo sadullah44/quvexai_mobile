@@ -1,16 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quvexai_mobile/features/tests/data/models/test_model.dart';
 
-/// Bu sınıf artık GERÇEK API yerine uydurma (mock) veriler döndürüyor.
+/// Bu sınıf API yerine mock veri sağlıyor
 class TestApiDataSource {
   TestApiDataSource();
 
-  /// Uydurma test listesi
   Future<List<TestModel>> getTests() async {
-    // 1 saniyelik gecikme ekleyelim (gerçek API hissi için)
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(
+      const Duration(seconds: 1),
+    ); // API gecikmesi simülasyonu
 
-    // Mock test listemiz
     final mockTests = [
       TestModel(
         id: '1',
@@ -20,6 +19,30 @@ class TestApiDataSource {
         estimatedTimeMins: 10,
         description:
             'Bu test, Flutter temel bilgilerini ölçmek için hazırlanmıştır.',
+        questions: [
+          Question(
+            id: 'q1',
+            question: 'Flutter nedir?',
+            options: [
+              'Bir oyun motoru',
+              'Bir mobil framework',
+              'Bir veritabanı',
+              'Bir programlama dili',
+            ],
+            answer: 'Bir mobil framework',
+          ),
+          Question(
+            id: 'q2',
+            question: 'StatelessWidget ne zaman kullanılır?',
+            options: [
+              'Durum gerekmiyorsa',
+              'Her zaman',
+              'Sadece form yaparken',
+              'Hiçbir zaman',
+            ],
+            answer: 'Durum gerekmiyorsa',
+          ),
+        ],
       ),
       TestModel(
         id: '2',
@@ -27,17 +50,21 @@ class TestApiDataSource {
         category: 'Bilgisayar Bilimi',
         difficulty: 'Orta',
         estimatedTimeMins: 20,
-        description:
-            'Bu test, algoritma mantığı ve veri yapısı kavramlarını ölçer.',
-      ),
-      TestModel(
-        id: '3',
-        name: 'Yapay Zeka Temelleri',
-        category: 'AI & ML',
-        difficulty: 'Zor',
-        estimatedTimeMins: 25,
-        description:
-            'Bu test, yapay zeka temelleri ve makine öğrenmesi prensiplerini kapsar.',
+        description: 'Algoritma ve veri yapıları bilgisini ölçer.',
+        questions: [
+          Question(
+            id: 'q1',
+            question: 'En hızlı arama yöntemi hangisidir?',
+            options: ['Linear Search', 'Binary Search', 'Bubble Sort', 'DFS'],
+            answer: 'Binary Search',
+          ),
+          Question(
+            id: 'q2',
+            question: 'Stack veri yapısında hangi işlem LIFO’ya örnektir?',
+            options: ['Push', 'Pop', 'Enqueue', 'Dequeue'],
+            answer: 'Pop',
+          ),
+        ],
       ),
     ];
 
@@ -45,8 +72,7 @@ class TestApiDataSource {
   }
 }
 
-/// --- Riverpod Provider ---
-/// Bu provider, "mock" veri kaynağını Riverpod'a tanıtır.
+/// Riverpod provider
 final testApiDataSourceProvider = Provider<TestApiDataSource>((ref) {
   return TestApiDataSource();
 });

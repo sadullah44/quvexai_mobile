@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:quvexai_mobile/features/tests/data/models/test_model.dart'; // 1. "Tercümanımızı" (Kargo Tipi) import etmeliyiz
+import 'package:go_router/go_router.dart';
+import 'package:quvexai_mobile/features/tests/data/models/test_model.dart';
 
-/// Bu ekran, 'TestListScreen'den "kargo" ('extra') olarak gönderilen
-/// 'TestModel'i alır ve detaylarını gösterir.
 class TestDetailScreen extends StatelessWidget {
-  // 2. "Kargoyu" ('extra: test') almak için bir alan tanımlıyoruz.
   final TestModel test;
 
-  // 1. 'TestModel'i constructor'da (kurucuda) zorunlu olarak istiyoruz.
   const TestDetailScreen({super.key, required this.test});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // 3. App Bar'da testin adını gösteriyoruz
       appBar: AppBar(title: Text(test.name)),
-
-      // 4. Gövdede (body) testin diğer detaylarını gösteriyoruz
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -40,16 +34,11 @@ class TestDetailScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const Divider(height: 40),
-
-            // 5. 'TestModel'imizden (ve 'test_list.json'dan) gelen
-            //    'description' alanını gösteriyoruz.
             Text(
               test.description ?? 'Bu test için açıklama bulunamadı.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-
-            const Spacer(), // Kalan boşluğu doldurarak butonu en alta iter
-            // 6. PLANIMIZDAKİ (Madde 2) "Teste Başla" Butonu
+            const Spacer(),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -61,10 +50,8 @@ class TestDetailScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 18),
                 ),
                 onPressed: () {
-                  // TODO: MADDE 3
-                  // Burası, 'Test Çözme' ekranına
-                  // yönlendirme yapacağımız yer.
-                  // context.push('/test-session/${test.id}');
+                  // TestModel objesini extra olarak gönderiyoruz
+                  context.push('/test-session/${test.id}', extra: test);
                 },
               ),
             ),
