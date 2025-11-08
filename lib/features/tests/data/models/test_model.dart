@@ -56,7 +56,7 @@ class TestModel {
       id: json['id'] ?? '',
       name: json['name'] ?? '',
       category: json['category'] ?? '',
-      estimatedTimeMins: json['estimatedTimeMins'] ?? 0,
+      estimatedTimeMins: json['estimated_time_mins'] ?? 0,
       difficulty: json['difficulty'] ?? '',
       description: json['description'],
       questions:

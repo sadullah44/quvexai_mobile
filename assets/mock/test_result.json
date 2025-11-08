@@ -1,0 +1,12 @@
+{
+    "sessionId": "session_123",
+    "totalScore": 75.0,
+    "categoryScores": {
+        "Anksiyete": 80,
+        "Travma": 70,
+        "Stres": 60,
+        "Depresyon": 90
+    },
+    "feedback": "Sonuçlar orta düzeyde stres ve travma tepkileri gösteriyor. Düzenli nefes egzersizleri ve profesyonel destek önerilir.",
+    "completedAt": "2025-11-08T12:00:00Z"
+}
