@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../datasources/mock_test_result_data_source.dart';
-import '../datasources/test_result_local_data_source.dart'; // <-- YENİ
+import '../datasources/test_result_local_data_source.dart';
 import '../models/test_result_model.dart';
 
 class TestResultRepository {
   final MockTestResultDataSource _apiDataSource;
-  final TestResultLocalDataSource _localDataSource; // <-- YENİ BAĞIMLILIK
+  final TestResultLocalDataSource _localDataSource;
 
   TestResultRepository(this._apiDataSource, this._localDataSource);
 
@@ -19,23 +19,21 @@ class TestResultRepository {
 
       return result;
     } catch (e) {
-      // İleride burada: "API hata verirse local'den dön" mantığı eklenecek (Madde 5)
       rethrow;
     }
   }
 
-  // Geçmiş sonuçları listelemek için yeni fonksiyon
-  List<TestResultModel> getLocalResults() {
-    return _localDataSource.getAllTestResults();
+  /// [getTestHistory] - Geçmiş test sonuçlarını localden getirir.
+  /// Asenkron (Future) yaptık ki ileride veritabanı değişirse UI etkilenmesin.
+  Future<List<TestResultModel>> getTestHistory() async {
+    // LocalDataSource'daki metodumuzun adı 'getTestHistory' idi.
+    return _localDataSource.getTestHistory();
   }
 }
 
-// --- Güncellenmiş Provider ---
+// --- Provider ---
 final testResultRepositoryProvider = Provider<TestResultRepository>((ref) {
-  // İki kaynağı da alıyoruz
   final api = ref.read(mockTestResultDataSourceProvider);
   final local = ref.read(testResultLocalDataSourceProvider);
-
-  // İkisini de Aracı'ya veriyoruz
   return TestResultRepository(api, local);
 });

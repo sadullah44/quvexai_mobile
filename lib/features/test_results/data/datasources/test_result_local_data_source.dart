@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
-import '../models/test_result_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/test_result_model.dart';
 
 class TestResultLocalDataSource {
   // Kutumuzun adı sabit olsun, hata yapmayalım.
@@ -10,20 +10,24 @@ class TestResultLocalDataSource {
   Future<void> saveTestResult(TestResultModel result) async {
     final box = Hive.box<TestResultModel>(_boxName);
 
-    // 'put' kullanırsak bir anahtar (key) vermemiz gerekir.
-    // 'add' kullanırsak Hive otomatik bir numara verir.
-    // Biz sessionId'yi anahtar olarak kullanalım ki aynı testi
-    // tekrar kaydedersek üzerine yazsın (güncellesin).
+    // sessionId'yi anahtar olarak kullanarak kaydediyoruz.
+    // Böylece aynı session tekrar gelirse üzerine yazar (günceller).
     await box.put(result.sessionId, result);
 
     print("✅ Hive: Test sonucu kaydedildi -> ${result.sessionId}");
   }
 
-  /// [getAllTestResults] - Geçmiş tüm test sonuçlarını getirir.
-  List<TestResultModel> getAllTestResults() {
+  /// [getTestHistory] - Kutudaki TÜM geçmiş test sonuçlarını getirir.
+  List<TestResultModel> getTestHistory() {
     final box = Hive.box<TestResultModel>(_boxName);
-    // Kutudaki tüm değerleri bir liste olarak döndür.
-    return box.values.toList();
+
+    // Kutudaki tüm değerleri al, listeye çevir.
+    final history = box.values.toList();
+
+    // Yeniden eskiye doğru sırala (En son çözülen en üstte görünsün)
+    history.sort((a, b) => b.completedAt.compareTo(a.completedAt));
+
+    return history;
   }
 }
 
