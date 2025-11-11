@@ -24,7 +24,7 @@ class TestResultDataSource {
       } else {
         throw Exception('Sunucu hatası: ${response.statusCode}');
       }
-    } on DioError catch (e) {
+    } on DioException catch (e) {
       // DioError detaylarını loglayıp tekrar fırlat
       throw Exception('Network hatası: ${e.message}');
     } catch (e) {

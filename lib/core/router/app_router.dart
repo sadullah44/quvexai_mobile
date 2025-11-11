@@ -9,6 +9,7 @@ import 'package:quvexai_mobile/features/tests/data/models/test_model.dart';
 import 'package:quvexai_mobile/features/tests/presentation/screens/test_list_screen.dart';
 import 'package:quvexai_mobile/features/test_session/presentation/screens/test_session_screen.dart';
 import 'package:quvexai_mobile/features/test_results/presentation/screens/test_result_screen.dart';
+import 'package:quvexai_mobile/features/test_results/presentation/screens/test_history_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -38,7 +39,7 @@ class AppRouter {
           return TestDetailScreen(test: test);
         },
       ),
-      // ✅ Düzeltildi: Artık TestModel alıyor, testName değil
+
       GoRoute(
         path: '/test-session/:testId',
         builder: (context, state) {
@@ -47,13 +48,18 @@ class AppRouter {
           return TestSessionScreen(testId: testId, testName: test.name);
         },
       ),
-      // YENİ ROTA: Test Sonuç Ekranı
+
       GoRoute(
         path: '/test-results/:sessionId',
         builder: (BuildContext context, GoRouterState state) {
           final sessionId = state.pathParameters['sessionId']!;
           return TestResultScreen(sessionId: sessionId);
         },
+      ),
+      // Test Geçmişi Ekranı
+      GoRoute(
+        path: '/test-history',
+        builder: (context, state) => const TestHistoryScreen(),
       ),
     ],
   );

@@ -17,10 +17,23 @@ class ProfileTab extends ConsumerWidget {
     });
 
     return Center(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-        onPressed: () => ref.read(authProvider.notifier).logout(),
-        child: const Text('Çıkış Yap'),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // YENİ BUTON: Geçmiş Testlerim
+          ElevatedButton.icon(
+            icon: const Icon(Icons.history),
+            label: const Text('Geçmiş Testlerim'),
+            onPressed: () => context.push('/test-history'),
+          ),
+          const SizedBox(height: 20),
+          // ESKİ ÇIKIŞ BUTONU
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () => ref.read(authProvider.notifier).logout(),
+            child: const Text('Çıkış Yap'),
+          ),
+        ],
       ),
     );
   }

@@ -20,8 +20,9 @@ class TestSessionNotifier extends Notifier<TestSessionState> {
   Future<void> loadQuestions(String testId) async {
     // Eğer zaten yükleniyorsa veya yüklendiyse tekrar yapma
     if (state.status == TestSessionStatus.loading ||
-        state.status == TestSessionStatus.loaded)
+        state.status == TestSessionStatus.loaded) {
       return;
+    }
 
     try {
       // Yükleniyor durumuna geç

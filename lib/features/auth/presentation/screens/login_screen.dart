@@ -11,9 +11,9 @@ class LoginScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final _formKey = GlobalKey<FormState>();
-    final _emailController = TextEditingController();
-    final _passwordController = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
     // -----------------------------------------------------------------
 
     ref.listen(authProvider, (previousState, newState) {
@@ -50,12 +50,12 @@ class LoginScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
 
                 Form(
-                  key: _formKey,
+                  key: formKey,
                   child: Column(
                     children: [
                       // Email
                       TextFormField(
-                        controller: _emailController,
+                        controller: emailController,
                         decoration: const InputDecoration(
                           labelText: "E-posta",
                           prefixIcon: Icon(Icons.email_outlined),
@@ -67,7 +67,7 @@ class LoginScreen extends ConsumerWidget {
                       const SizedBox(height: 16),
 
                       TextFormField(
-                        controller: _passwordController,
+                        controller: passwordController,
                         obscureText: true,
                         decoration: const InputDecoration(
                           labelText: "Şifre",
@@ -88,14 +88,12 @@ class LoginScreen extends ConsumerWidget {
                     onPressed: authState.isLoading
                         ? null
                         : () {
-                            // 1. ADIM: VALIDASYON
-                            if (_formKey.currentState!.validate()) {
-                              // 2. ADIM: MANTIK (Beyni Çağırma)
+                            if (formKey.currentState!.validate()) {
                               ref
                                   .read(authProvider.notifier)
                                   .login(
-                                    _emailController.text.trim(),
-                                    _passwordController.text.trim(),
+                                    emailController.text.trim(),
+                                    passwordController.text.trim(),
                                   );
                             }
                           },

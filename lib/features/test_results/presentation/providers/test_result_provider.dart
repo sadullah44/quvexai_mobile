@@ -2,7 +2,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/test_result_model.dart';
 import '../../data/repositories/test_result_repository.dart';
 
-// --- STATE (Gösterge Paneli) ---
 class TestResultState {
   final bool isLoading;
   final TestResultModel? result;
@@ -26,7 +25,6 @@ class TestResultState {
   }
 }
 
-// --- NOTIFIER (Beyin) ---
 class TestResultNotifier extends StateNotifier<TestResultState> {
   final TestResultRepository _repository;
 
@@ -36,7 +34,6 @@ class TestResultNotifier extends StateNotifier<TestResultState> {
     try {
       state = state.copyWith(isLoading: true, errorMessage: null);
 
-      // İŞTE SİHİRLİ SATIR BURASI!
       // Bu çağrı yapıldığında Repository hem API'den çekecek HEM DE Hive'a kaydedecek.
       final result = await _repository.getResult(sessionId);
 
@@ -47,7 +44,6 @@ class TestResultNotifier extends StateNotifier<TestResultState> {
   }
 }
 
-// --- PROVIDER (Fabrika) ---
 final testResultProvider =
     StateNotifierProvider<TestResultNotifier, TestResultState>((ref) {
       final repo = ref.read(testResultRepositoryProvider);

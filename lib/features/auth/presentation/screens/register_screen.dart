@@ -14,10 +14,10 @@ class RegisterScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // 2. Form Anahtarı ve 3 adet Kontrolcü
-    final _formKey = GlobalKey<FormState>();
-    final _emailController = TextEditingController();
-    final _passwordController = TextEditingController();
-    final _confirmPasswordController = TextEditingController(); // <-- YENİ
+    final formKey = GlobalKey<FormState>();
+    final emailController = TextEditingController();
+    final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController(); // <-- YENİ
 
     // 3. 'ref.listen' (Giriş (Login) ile aynı)
     //    Hata ışığını (Snackbar) veya Başarı ışığını (Yönlendirme) dinler
@@ -47,7 +47,7 @@ class RegisterScreen extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             // 5. Form (Anahtarı atadık)
             child: Form(
-              key: _formKey,
+              key: formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -64,7 +64,7 @@ class RegisterScreen extends ConsumerWidget {
 
                   // Email (Login ile aynı)
                   TextFormField(
-                    controller: _emailController,
+                    controller: emailController,
                     decoration: const InputDecoration(
                       labelText: "E-posta",
                       prefixIcon: Icon(Icons.email_outlined),
@@ -76,7 +76,7 @@ class RegisterScreen extends ConsumerWidget {
 
                   // Şifre (Login ile aynı)
                   TextFormField(
-                    controller: _passwordController,
+                    controller: passwordController,
                     obscureText: true,
                     decoration: const InputDecoration(
                       labelText: "Şifre",
@@ -90,7 +90,7 @@ class RegisterScreen extends ConsumerWidget {
                   // --- YENİ ALAN ---
                   // Şifre Tekrarı
                   TextFormField(
-                    controller: _confirmPasswordController,
+                    controller: confirmPasswordController,
                     obscureText: true,
                     decoration: const InputDecoration(
                       labelText: "Şifre Tekrarı",
@@ -102,7 +102,7 @@ class RegisterScreen extends ConsumerWidget {
                     // '_passwordController.text' (diğer alanın değeri) karşılaştırılır
                     validator: (value) =>
                         Validators.validatePasswordConfirmation(
-                          _passwordController.text,
+                          passwordController.text,
                           value,
                         ),
                   ),
@@ -118,14 +118,14 @@ class RegisterScreen extends ConsumerWidget {
                           ? null
                           : () {
                               // 8. FORM KONTROLÜ (Login ile aynı)
-                              if (_formKey.currentState!.validate()) {
+                              if (formKey.currentState!.validate()) {
                                 // 9. BEYNİ ÇAĞIRMA (Farklı fonksiyon)
                                 // 'login' yerine 'register' fonksiyonunu çağırıyoruz
                                 ref
                                     .read(authProvider.notifier)
                                     .register(
-                                      _emailController.text.trim(),
-                                      _passwordController.text.trim(),
+                                      emailController.text.trim(),
+                                      passwordController.text.trim(),
                                     );
                               }
                             },

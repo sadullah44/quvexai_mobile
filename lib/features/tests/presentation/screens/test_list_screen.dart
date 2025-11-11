@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 // 1. DOĞRU İMPORT: "Beyin"i ('testProvider') import ediyoruz
 import 'package:quvexai_mobile/features/tests/presentation/providers/test_provider.dart';
 // 2. MODELİ import ediyoruz (Kartta kullanmak için)
-import 'package:quvexai_mobile/features/tests/data/models/test_model.dart';
 
 // 3. 'ConsumerStatefulWidget'a dönüştürdük.
 //    - 'Consumer': 'ref' (Riverpod) aracını kullanmak için.
@@ -40,9 +39,6 @@ class _TestListScreenState extends ConsumerState<TestListScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Test Listesi')),
-
-      // 6. DURUMA (STATE) GÖRE ARAYÜZÜ (UI) ÇİZ:
-      // ('FutureBuilder' yerine bu 'if/else' bloğunu kullanıyoruz)
 
       // DURUM A: Yükleniyor mu?
       body: state.isLoading
