@@ -17,6 +17,17 @@ class TestResultLocalDataSource {
     print("✅ Hive: Test sonucu kaydedildi -> ${result.sessionId}");
   }
 
+  /// [cacheTestHistory] - API'den gelen listeyi alıp hepsini kutuya doldurur (Önbellekleme).
+  Future<void> cacheTestHistory(List<TestResultModel> results) async {
+    final box = Hive.box<TestResultModel>(_boxName);
+
+    // Döngü ile hepsini tek tek 'put' yapıyoruz.
+    for (var result in results) {
+      await box.put(result.sessionId, result);
+    }
+    print("✅ Hive: ${results.length} adet geçmiş kayıt önbelleklendi.");
+  }
+
   /// [getTestHistory] - Kutudaki TÜM geçmiş test sonuçlarını getirir.
   List<TestResultModel> getTestHistory() {
     final box = Hive.box<TestResultModel>(_boxName);

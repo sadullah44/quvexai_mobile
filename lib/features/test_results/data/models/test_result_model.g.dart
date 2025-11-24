@@ -22,13 +22,14 @@ class TestResultModelAdapter extends TypeAdapter<TestResultModel> {
       categoryScores: (fields[2] as Map).cast<String, int>(),
       feedback: fields[3] as String,
       completedAt: fields[4] as DateTime,
+      testName: fields[5] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, TestResultModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.sessionId)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class TestResultModelAdapter extends TypeAdapter<TestResultModel> {
       ..writeByte(3)
       ..write(obj.feedback)
       ..writeByte(4)
-      ..write(obj.completedAt);
+      ..write(obj.completedAt)
+      ..writeByte(5)
+      ..write(obj.testName);
   }
 
   @override

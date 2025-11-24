@@ -59,7 +59,9 @@ class AppRouter {
       // Test Geçmişi Ekranı
       GoRoute(
         path: '/test-history',
-        builder: (context, state) => const TestHistoryScreen(),
+        builder: (BuildContext context, GoRouterState state) {
+          return const TestHistoryScreen();
+        },
       ),
     ],
   );

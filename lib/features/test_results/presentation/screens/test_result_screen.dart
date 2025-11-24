@@ -179,7 +179,7 @@ class _TestResultScreenState extends ConsumerState<TestResultScreen> {
                         trailing: Text('${entry.value}/100'),
                       ),
                     );
-                  }).toList(),
+                  }),
                   const SizedBox(height: 24),
 
                   // GELİŞİM ÖNERİSİ

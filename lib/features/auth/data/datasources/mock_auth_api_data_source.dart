@@ -1,54 +1,76 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quvexai_mobile/features/auth/data/models/user_model.dart';
 
-// Bu, bizim "sahte" API sunucumuzdur.
-// Gerçek bir API'nin davranışlarını taklit eder.
 class MockAuthApiDataSource {
-  /// [login] - Sahte Giriş Fonksiyonu
-  ///
-  /// Başarılı olursa, sahte bir 'token' (String) döndürür.
-  /// Başarısız olursa, bir 'Exception' (Hata) fırlatır.
+  /// [login] - Giriş yapma simülasyonu
   Future<String> login(String email, String password) async {
-    // 1. Ağ gecikmesini (network latency) taklit etmek için 1 saniye bekliyoruz.
-    //    Bu, "Yükleniyor" animasyonunu test edebilmemiz için çok önemlidir.
+    // 1. Ağ gecikmesini simüle et
     await Future.delayed(const Duration(seconds: 1));
 
-    // 2. Başarısızlık durumunu simüle etme:
-    //    Eğer 'error@test.com' kullanılırsa, hata ver.
+    // 2. Hata senaryosu testi için özel durum
     if (email == 'error@test.com') {
-      // 'throw' komutu, kodun "catch" bloğuna düşmesini sağlar.
       throw Exception('Hatalı şifre veya e-posta (Mock Hata)');
     }
 
-    // 3. Başarılı durumu simüle etme:
-    //    Diğer tüm giriş denemeleri başarılı sayılsın ve
-    //    sahte bir token döndürsün.
-    return 'xyz-123-sahte-token-kaynaktan-geldi';
+    // 3. ZEKİ MOCK MANTIĞI:
+    // Token olarak rastgele şifre yerine E-POSTA adresini dönüyoruz.
+    // Böylece 'Beni Hatırla' dediğimizde kimin girdiğini hatırlayabileceğiz.
+    return email;
   }
 
-  /// [register] - Sahte Kayıt Olma Fonksiyonu
-  /// (Register ekranı için)
+  /// [register] - Kayıt olma simülasyonu
   Future<String> register(String email, String password) async {
-    // 1 saniye bekle
     await Future.delayed(const Duration(seconds: 1));
 
-    // 2. Kayıt hatasını simüle etme:
+    // Hata senaryosu
     if (email == 'taken@test.com') {
       throw Exception('Bu e-posta zaten kullanımda (Mock Hata)');
     }
 
-    // 3. Başarılı kayıt (yeni bir token döndür)
-    return 'abc-987-yeni-kayit-tokeni';
+    // Kayıt başarılı, token (e-posta) dön
+    return email;
   }
 
-  /// [logout] - Sahte Çıkış Yapma Fonksiyonu
+  /// [logout] - Çıkış yapma simülasyonu
   Future<void> logout() async {
-    // Sadece çıkış yapmış gibi davran, 1 saniye bekle.
     await Future.delayed(const Duration(milliseconds: 500));
-    return; // Hiçbir şey döndürme (void)
+  }
+
+  /// [getUserProfile] - Token'a (yani E-postaya) bakarak kullanıcıyı oluşturur.
+  /// Bu sayede veritabanı olmadan dinamik kullanıcılar yaratırız.
+  Future<UserModel> getUserProfile(String token) async {
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Bizim sistemimizde Token = Email
+    final email = token;
+
+    // E-postadan İsim Türetme Mantığı:
+    // "sadullah@gmail.com" -> "Sadullah"
+    String name = "Kullanıcı";
+    if (email.contains('@')) {
+      name = email.split('@')[0]; // @ işaretinden öncesini al
+
+      // İsmin baş harfini büyüt (Süsleme)
+      if (name.isNotEmpty) {
+        name = name[0].toUpperCase() + name.substring(1);
+      }
+    }
+
+    // Dinamik Kullanıcıyı Döndür
+    return UserModel(
+      id: 'user_${email.hashCode}', // E-postaya özel sabit bir ID üretir
+      name: name,
+      email: email,
+      // Robohash servisi, e-postaya göre her seferinde AYNI ama kişiye ÖZEL
+      // bir avatar (kedi/robot) üretir.
+      profileImageUrl: 'https://robohash.org/$email?set=set4',
+      totalTestsTaken:
+          email.length, // Rastgele sayı yerine ismin uzunluğunu verelim :)
+    );
   }
 }
 
+// --- Riverpod Provider ---
 final mockAuthApiDataSourceProvider = Provider<MockAuthApiDataSource>((ref) {
-  // Sadece sınıfın bir örneğini (instance) oluştur ve döndür.
   return MockAuthApiDataSource();
 });
