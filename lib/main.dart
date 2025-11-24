@@ -1,36 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
-// 1. Gerekli Importlar
 // Modeller ve Router
 import 'features/test_results/data/models/test_result_model.dart';
 import 'core/router/app_router.dart';
-// Tema Dosyası
 import 'core/theme/app_theme.dart';
+import 'core/notifications/app_start_listener.dart';
 
-void main() async {
-  // 1. Flutter motorunu hazırla (Bu EN BAŞTA olmalı)
+/// 🔥 ARKA PLAN MESAJ HANDLER
+/// Mutlaka top-level olacak (class içinde değil, main dışında)
+/// VE @pragma('vm:entry-point') ile işaretlenecek
+@pragma('vm:entry-point')
+Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("🔥 [BACKGROUND] Bildirim alındı:");
+  print("Title: ${message.notification?.title}");
+  print("Body: ${message.notification?.body}");
+  print("DATA: ${message.data}");
+  await Firebase.initializeApp();
+  print("🔥 Arka planda mesaj alındı: ${message.messageId}");
+}
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 2. Hive'ı (Local DB) başlat
+  // Firebase başlat
+  await Firebase.initializeApp();
+
+  // Arka plan mesaj handler kaydı
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  // Hive başlat
   await Hive.initFlutter();
-
-  // 3. Tercümanı (Adapter) tanıt
-  // (Test sonuçlarını kaydedebilmek için generated adapter'ı bağlıyoruz)
-  // Eğer 'TestResultModelAdapter' bulunamıyor hatası alırsanız:
-  // 'dart run build_runner build' komutunu çalıştırdığınızdan emin olun.
   Hive.registerAdapter(TestResultModelAdapter());
-
-  // 4. Kutuyu aç (Veritabanı dosyası)
-  // Uygulama boyunca kullanılacak test sonuçları kutusunu açıyoruz.
   await Hive.openBox<TestResultModel>('test_results_box');
 
-  // 5. Uygulamayı başlat
-  runApp(
-    // Tüm uygulamayı Riverpod "Ana Şalteri" ile sarmalıyoruz
-    const ProviderScope(child: MyApp()),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -38,21 +45,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      // 6. Router Yapılandırması (GoRouter)
-      routerConfig: AppRouter.router,
-
-      // Debug yazısını kaldır
-      debugShowCheckedModeBanner: false,
-      title: 'QuvexAI',
-
-      // 7. Tema Yapılandırması
-      // (Oluşturduğumuz modern temayı buraya bağlıyoruz)
-      theme: AppTheme.lightTheme,
-
-      // (Karanlık mod için ileride darkTheme de eklenebilir)
-      // Şimdilik sadece light tema kullanıyoruz.
-      themeMode: ThemeMode.light,
+    return AppStartListener(
+      child: MaterialApp.router(
+        routerConfig: AppRouter.router,
+        debugShowCheckedModeBanner: false,
+        title: 'QuvexAI',
+        theme: AppTheme.lightTheme,
+        themeMode: ThemeMode.light,
+      ),
     );
   }
 }
