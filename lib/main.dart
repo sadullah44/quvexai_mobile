@@ -9,6 +9,7 @@ import 'features/test_results/data/models/test_result_model.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/notifications/app_start_listener.dart';
+import 'core/notifications/notification_service.dart';
 
 /// 🔥 ARKA PLAN MESAJ HANDLER
 /// Mutlaka top-level olacak (class içinde değil, main dışında)
@@ -28,6 +29,11 @@ Future<void> main() async {
 
   // Firebase başlat
   await Firebase.initializeApp();
+  final settings = await FirebaseMessaging.instance.requestPermission();
+  print("🔔 Notification permission: ${settings.authorizationStatus}");
+
+  // 🔔 Local Notification başlat
+  await NotificationService.instance.init();
 
   // Arka plan mesaj handler kaydı
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);

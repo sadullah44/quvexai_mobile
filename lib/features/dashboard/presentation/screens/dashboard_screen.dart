@@ -8,6 +8,8 @@ import 'package:quvexai_mobile/features/auth/presentation/providers/auth_provide
 // Sekmelerimizi import ediyoruz
 import 'package:quvexai_mobile/features/dashboard/presentation/tabs/test_list_tab.dart';
 import 'package:quvexai_mobile/features/dashboard/presentation/tabs/profile_tab.dart';
+// Local Notifications
+import 'package:quvexai_mobile/core/notifications/notification_service.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -60,6 +62,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       appBar: AppBar(title: Text(titles[_selectedIndex]), centerTitle: true),
       // Seçili sekmeyi göster
       body: IndexedStack(index: _selectedIndex, children: _widgetOptions),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          NotificationService.instance.showNotification(
+            title: "QuvexAI Test Bildirimi",
+            body: "Local notification başarıyla çalıştı ✨",
+          );
+        },
+        child: const Icon(Icons.notifications),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
       // Alt Navigasyon Çubuğu
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
