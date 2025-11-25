@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:go_router/go_router.dart';
+// Bildirim Servisimizi import ediyoruz
+import 'package:quvexai_mobile/core/notifications/notification_service.dart';
 
 class AppStartListener extends StatefulWidget {
   final Widget child;
@@ -14,56 +16,60 @@ class _AppStartListenerState extends State<AppStartListener> {
   @override
   void initState() {
     super.initState();
+
+    // 1. iOS için ön planda bildirim gösterme ayarı (Android için aşağıda manuel yapıyoruz)
     FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,
       sound: true,
     );
 
-    // App tamamen kapalıyken bildirime tıklama
+    // 2. Uygulama KAPALIYKEN bildirime tıklanırsa
     FirebaseMessaging.instance.getInitialMessage().then((message) {
       if (message != null) {
-        final type = message.data["type"];
-
-        if (type == "daily_reminder") {
-          context.push("/tests");
-        } else if (type == "test_result") {
-          final sessionId = message.data["sessionId"];
-          context.push("/test-results/$sessionId");
-        } else if (type == "sync") {
-          context.push("/dashboard");
-        }
+        _handleRedirect(message);
       }
     });
 
-    // foreground
-    FirebaseMessaging.onMessage.listen((message) {});
+    // 3. Uygulama ARKA PLANDAYKEN (ama açıkken) bildirime tıklanırsa
+    // DÜZELTME: .instance kaldırıldı, onMessageOpenedApp statik bir üyedir.
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      _handleRedirect(message);
+    });
 
-    // background → app açıkken tıklama
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {});
-
-    // 🔥 Foreground mesaj listener
+    // 4. 🔥 UYGULAMA AÇIKKEN (FOREGROUND) BİLDİRİM GELDİĞİNDE 🔥
+    // Sorunun çözümü burasıdır.
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print("📩 Foreground bildirim geldi: ${message.notification?.title}");
-      print("📄 Body: ${message.notification?.body}");
-    });
 
-    // 🔥 Bildirim tıklama (app açıkken)
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print("👉 Bildirim tıklandı. Payload:");
-      print(message.data);
-
-      final type = message.data["type"];
-
-      if (type == "daily_reminder") {
-        context.push("/tests");
-      } else if (type == "test_result") {
-        final sessionId = message.data["sessionId"];
-        context.push("/test-results/$sessionId");
-      } else if (type == "sync") {
-        context.push("/dashboard");
+      // Eğer gelen mesajın bir "Notification" başlığı varsa
+      if (message.notification != null) {
+        // Firebase mesajını alıp, kendi Local Notification servisimizle gösteriyoruz
+        NotificationService.instance.showNotification(
+          title: message.notification!.title ?? "Bildirim",
+          body: message.notification!.body ?? "",
+          payload: message.data
+              .toString(), // Veriyi payload olarak saklayabiliriz
+        );
       }
     });
+  }
+
+  // Yönlendirme Mantığı (Kod tekrarını önlemek için ayırdık)
+  void _handleRedirect(RemoteMessage message) {
+    print("👉 Bildirim yönlendirmesi: ${message.data}");
+    final type = message.data["type"];
+
+    if (type == "daily_reminder") {
+      context.push("/tests");
+    } else if (type == "test_result") {
+      final sessionId = message.data["sessionId"];
+      if (sessionId != null) {
+        context.push("/test-results/$sessionId");
+      }
+    } else if (type == "sync") {
+      context.push("/dashboard");
+    }
   }
 
   @override

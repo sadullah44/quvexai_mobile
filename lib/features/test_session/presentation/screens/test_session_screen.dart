@@ -190,6 +190,7 @@ class _TestSessionScreenState extends ConsumerState<TestSessionScreen> {
                                         .selectAnswer(
                                           currentQuestion.id,
                                           answer.id,
+                                          widget.testId,
                                         );
                                   },
                             borderRadius: BorderRadius.circular(12),
@@ -308,7 +309,9 @@ class _TestSessionScreenState extends ConsumerState<TestSessionScreen> {
                       ? null
                       : () {
                           if (state.currentIndex == totalQuestions - 1) {
-                            ref.read(testSessionProvider.notifier).submitTest();
+                            ref
+                                .read(testSessionProvider.notifier)
+                                .submitTest(widget.testId);
                           } else {
                             ref
                                 .read(testSessionProvider.notifier)

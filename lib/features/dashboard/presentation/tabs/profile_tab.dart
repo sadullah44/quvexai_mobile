@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+
+// Auth (Giriş) Beynini import ediyoruz
 import 'package:quvexai_mobile/features/auth/presentation/providers/auth_provider.dart';
 
 class ProfileTab extends ConsumerWidget {
@@ -12,17 +15,14 @@ class ProfileTab extends ConsumerWidget {
     final authState = ref.watch(authProvider);
     final user = authState.user;
 
-    // --- DÜZELTME: EMNİYET SÜBAPI ---
-    // Eğer token 'null' olduysa (yani çıkış yapıldıysa)
-    // ama biz hala bu ekrandaysak, bekleme yapma, hemen git!
+    // --- EMNİYET SÜBAPI ---
+    // Eğer token 'null' olduysa (çıkış yapıldıysa) hemen login'e git
     if (authState.token == null) {
-      // 'build' sırasında yönlendirme hatası almamak için 'microtask' kullanıyoruz
       Future.microtask(() => context.go('/login'));
-      return const SizedBox(); // Boş bir widget döndür
+      return const SizedBox(); // Ekrana boş bir kutu çiz
     }
-    // --------------------------------
 
-    // Eğer kullanıcı bilgisi henüz yüklenmediyse (ve token hala varsa)
+    // Eğer kullanıcı bilgisi henüz yüklenmediyse (ama token varsa)
     if (user == null) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -41,7 +41,7 @@ class ProfileTab extends ConsumerWidget {
                 : null,
             child: user.profileImageUrl == null
                 ? Text(
-                    user.name[0].toUpperCase(),
+                    user.name.isNotEmpty ? user.name[0].toUpperCase() : "?",
                     style: const TextStyle(fontSize: 40),
                   )
                 : null,
@@ -67,9 +67,6 @@ class ProfileTab extends ConsumerWidget {
           // --- İstatistik Kartı ---
           Card(
             elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -83,8 +80,8 @@ class ProfileTab extends ConsumerWidget {
                   _buildStatItem(
                     context,
                     'Ortalama Puan',
-                    '85',
-                  ), // (İleride gerçek veri olacak)
+                    '85', // İleride gerçek veri ile değişecek
+                  ),
                 ],
               ),
             ),
@@ -102,7 +99,9 @@ class ProfileTab extends ConsumerWidget {
             context,
             icon: Icons.settings,
             label: 'Ayarlar',
-            onTap: () {},
+            onTap: () {
+              // Ayarlar sayfası eklendiğinde burası dolacak
+            },
           ),
 
           const SizedBox(height: 24),
@@ -126,12 +125,15 @@ class ProfileTab extends ConsumerWidget {
               ),
             ),
           ),
+
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
-  // Yardımcı Widget: İstatistik Kutucuğu
+  // --- YARDIMCI WIDGET'LAR ---
+
   Widget _buildStatItem(BuildContext context, String label, String value) {
     return Column(
       children: [
@@ -148,7 +150,6 @@ class ProfileTab extends ConsumerWidget {
     );
   }
 
-  // Yardımcı Widget: Menü Butonu
   Widget _buildMenuButton(
     BuildContext context, {
     required IconData icon,

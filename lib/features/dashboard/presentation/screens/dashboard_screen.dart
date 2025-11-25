@@ -32,6 +32,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     super.initState();
     // Testleri burada çekmemize gerek yok,
     // çünkü 'TestListTab' kendi içinde (initState'inde) zaten çekiyor.
+    // 🔔 Günlük test hatırlatmasını akşam 20:00'a planla
+    NotificationService.instance.scheduleDailyTestReminder(hour: 20, minute: 0);
   }
 
   void _onItemTapped(int index) {
@@ -62,16 +64,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       appBar: AppBar(title: Text(titles[_selectedIndex]), centerTitle: true),
       // Seçili sekmeyi göster
       body: IndexedStack(index: _selectedIndex, children: _widgetOptions),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          NotificationService.instance.showNotification(
-            title: "QuvexAI Test Bildirimi",
-            body: "Local notification başarıyla çalıştı ✨",
-          );
-        },
-        child: const Icon(Icons.notifications),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
 
       // Alt Navigasyon Çubuğu
       bottomNavigationBar: BottomNavigationBar(

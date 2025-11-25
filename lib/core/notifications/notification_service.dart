@@ -84,4 +84,48 @@ class NotificationService {
       payload: payload,
     );
   }
+
+  // 🔥 Günlük test hatırlatma bildirimi
+  Future<void> scheduleDailyTestReminder({
+    int hour = 20,
+    int minute = 0,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+
+    // Bugünün belirtilen saatine ayarla
+    var scheduledDate = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
+    );
+
+    // Eğer o saat geçtiyse, yarına kaydır
+    if (scheduledDate.isBefore(now)) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
+
+    await _notifications.zonedSchedule(
+      1, // bu hatırlatma için sabit id
+      "Bugün 1 test çözmeyi unutma",
+      "Ruh sağlığın için bugün en az 1 test çöz.",
+      scheduledDate,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'high_importance_channel',
+          'High Importance Notifications',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      // 👇👇👇 BU SATIR ÇOK ÖNEMLİ (HER GÜN TEKRARLAMASI İÇİN) 👇👇👇
+      matchDateTimeComponents: DateTimeComponents.time,
+      payload: "daily_test_reminder",
+    );
+
+    print("✅ Günlük test hatırlatma planlandı: $scheduledDate");
+  }
 }
