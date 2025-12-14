@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../datasources/mock_test_result_data_source.dart';
 import '../datasources/test_result_local_data_source.dart';
@@ -29,7 +30,7 @@ class TestResultRepository {
   Future<List<TestResultModel>> getTestHistory() async {
     try {
       // 1. Önce API'den güncel geçmişi çekmeyi dene
-      print("🌐 API'den geçmiş çekiliyor...");
+      debugPrint("🌐 API'den geçmiş çekiliyor...");
       final remoteData = await _apiDataSource.getAllTestResults();
 
       // 2. Başarılıysa, bu listeyi Hive'a (Local) topluca kaydet (Cache)
@@ -41,7 +42,9 @@ class TestResultRepository {
     } catch (e) {
       // 4. Hata olursa (İnternet yoksa, Sunucu çöktüyse),
       // Hive'daki (Local) eski veriyi döndür (Offline Mod).
-      print("⚠️ API Hatası ($e). Yerel hafıza (Offline Mod) kullanılıyor.");
+      debugPrint(
+        "⚠️ API Hatası ($e). Yerel hafıza (Offline Mod) kullanılıyor.",
+      );
 
       // Yerel kaynaktan listeyi getir
       return _localDataSource.getTestHistory();

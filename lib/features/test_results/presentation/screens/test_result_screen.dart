@@ -18,7 +18,10 @@ class _TestResultScreenState extends ConsumerState<TestResultScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(testResultProvider.notifier).fetchResult(widget.sessionId);
+      // 🔥 Sadece offline session'lar için sonuç getirme
+      if (!widget.sessionId.startsWith('offline-')) {
+        ref.read(testResultProvider.notifier).fetchResult(widget.sessionId);
+      }
     });
   }
 
@@ -26,10 +29,19 @@ class _TestResultScreenState extends ConsumerState<TestResultScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(testResultProvider);
 
+    // 🔥 Offline session kontrolü
+    final isOfflineSession = widget.sessionId.startsWith('offline-');
+
     return Scaffold(
       appBar: AppBar(title: const Text('Test Sonucu')),
       body: Builder(
         builder: (context) {
+          // 🔥 Offline test için özel ekran
+          if (isOfflineSession) {
+            return _buildOfflineMessage(context);
+          }
+
+          // 🔥 Online test sonuçları
           if (state.isLoading) {
             return const Center(child: CircularProgressIndicator());
           } else if (state.errorMessage != null) {
@@ -39,9 +51,22 @@ class _TestResultScreenState extends ConsumerState<TestResultScreen> {
                 children: [
                   const Icon(Icons.error_outline, color: Colors.red, size: 60),
                   const SizedBox(height: 16),
-                  Text(
-                    'Hata: ${state.errorMessage}',
-                    textAlign: TextAlign.center,
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Text(
+                      'Hata: ${state.errorMessage}',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      ref
+                          .read(testResultProvider.notifier)
+                          .fetchResult(widget.sessionId);
+                    },
+                    icon: const Icon(Icons.refresh),
+                    label: const Text('Tekrar Dene'),
                   ),
                 ],
               ),
@@ -132,7 +157,7 @@ class _TestResultScreenState extends ConsumerState<TestResultScreen> {
                         },
                         dataSets: [
                           RadarDataSet(
-                            fillColor: Colors.blue.withOpacity(0.3),
+                            fillColor: Colors.blue.withValues(alpha: 0.3),
                             borderColor: Colors.blue,
                             borderWidth: 2,
                             dataEntries: result.categoryScores.values
@@ -231,7 +256,6 @@ class _TestResultScreenState extends ConsumerState<TestResultScreen> {
                         textStyle: const TextStyle(fontSize: 16),
                       ),
                       onPressed: () {
-                        // Test listesine geri dön
                         context.go('/tests');
                       },
                     ),
@@ -247,7 +271,79 @@ class _TestResultScreenState extends ConsumerState<TestResultScreen> {
     );
   }
 
-  // Puana göre renk belirleme
+  /// 🔥 Offline test için bilgilendirme ekranı
+  Widget _buildOfflineMessage(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.cloud_off, size: 80, color: Colors.orange.shade400),
+            const SizedBox(height: 24),
+            const Text(
+              'Test Kuyruğa Eklendi',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'İnternet bağlantısı olmadığı için testiniz kuyruğa eklendi.',
+              style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'İnternet bağlantısı geldiğinde otomatik olarak gönderilecek ve sonuçlarınızı görebileceksiniz.',
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.blue.shade700),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Testiniz cihazınızda güvenle saklanıyor.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.blue.shade900,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.home),
+                label: const Text('Ana Sayfaya Dön'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.all(16),
+                  textStyle: const TextStyle(fontSize: 16),
+                ),
+                onPressed: () {
+                  context.go('/dashboard');
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// 🔥 Puana göre renk belirleme
   Color _getColorForScore(int score) {
     if (score >= 80) return Colors.green;
     if (score >= 60) return Colors.orange;

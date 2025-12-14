@@ -10,28 +10,43 @@ import 'package:quvexai_mobile/features/tests/presentation/screens/test_list_scr
 import 'package:quvexai_mobile/features/test_session/presentation/screens/test_session_screen.dart';
 import 'package:quvexai_mobile/features/test_results/presentation/screens/test_result_screen.dart';
 import 'package:quvexai_mobile/features/test_results/presentation/screens/test_history_screen.dart';
+import 'package:quvexai_mobile/core/settings/settings_screen.dart'; // 🔥 YENİ
 
 class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: '/splash',
     routes: <GoRoute>[
+      // ✅ Root route - dashboard'a yönlendir
+      GoRoute(path: '/', redirect: (context, state) => '/dashboard'),
+
       GoRoute(
         path: '/splash',
         builder: (context, state) => const SplashScreen(),
       ),
+
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+
       GoRoute(
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
       ),
+
       GoRoute(
         path: '/dashboard',
         builder: (context, state) => const DashboardScreen(),
       ),
+
+      // 🔥 YENİ: Settings Route
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+
       GoRoute(
         path: '/tests',
         builder: (context, state) => const TestListScreen(),
       ),
+
       GoRoute(
         path: '/tests/:id',
         builder: (context, state) {
@@ -43,7 +58,7 @@ class AppRouter {
       GoRoute(
         path: '/test-session/:testId',
         builder: (context, state) {
-          final test = state.extra as TestModel; // Test nesnesi geliyor
+          final test = state.extra as TestModel;
           final testId = state.pathParameters['testId']!;
           return TestSessionScreen(testId: testId, testName: test.name);
         },
@@ -56,7 +71,7 @@ class AppRouter {
           return TestResultScreen(sessionId: sessionId);
         },
       ),
-      // Test Geçmişi Ekranı
+
       GoRoute(
         path: '/test-history',
         builder: (BuildContext context, GoRouterState state) {

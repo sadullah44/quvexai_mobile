@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart'; // Dio (GET, POST)
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // Riverpod
 import 'package:quvexai_mobile/core/network/dio_client.dart'; // Bizim "Ana Veri Hattımız"
@@ -40,11 +41,11 @@ class TestApiDataSource {
       // 7. ADIM: HATA YÖNETİMİ
       // Eğer 'Dio' (API) bir hata verirse (örn: 404, 500, veya internet yok),
       // bu hatayı yakala ve daha anlaşılır bir hata fırlat.
-      print('TestApiDataSource Hata: $e');
+      debugPrint('TestApiDataSource Hata: $e');
       throw Exception('Testler API\'den alınamadı: ${e.message}');
     } catch (e) {
       // Beklenmedik bir hata olursa (örn: JSON 'tercüme' hatası)
-      print('TestApiDataSource Bilinmeyen Hata: $e');
+      debugPrint('TestApiDataSource Bilinmeyen Hata: $e');
       throw Exception('Testler işlenirken bilinmeyen bir hata oluştu: $e');
     }
   }

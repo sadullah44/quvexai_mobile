@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/test_result_model.dart';
@@ -14,7 +15,7 @@ class TestResultLocalDataSource {
     // Böylece aynı session tekrar gelirse üzerine yazar (günceller).
     await box.put(result.sessionId, result);
 
-    print("✅ Hive: Test sonucu kaydedildi -> ${result.sessionId}");
+    debugPrint("✅ Hive: Test sonucu kaydedildi -> ${result.sessionId}");
   }
 
   /// [cacheTestHistory] - API'den gelen listeyi alıp hepsini kutuya doldurur (Önbellekleme).
@@ -25,7 +26,7 @@ class TestResultLocalDataSource {
     for (var result in results) {
       await box.put(result.sessionId, result);
     }
-    print("✅ Hive: ${results.length} adet geçmiş kayıt önbelleklendi.");
+    debugPrint("✅ Hive: ${results.length} adet geçmiş kayıt önbelleklendi.");
   }
 
   /// [getTestHistory] - Kutudaki TÜM geçmiş test sonuçlarını getirir.

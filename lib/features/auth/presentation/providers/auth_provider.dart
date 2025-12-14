@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:quvexai_mobile/features/auth/data/repositories/auth_repository.dart';
 import 'package:quvexai_mobile/features/auth/presentation/providers/auth_state.dart';
@@ -25,7 +26,7 @@ class AuthNotifier extends Notifier<AuthState> {
       // Artık arayüz (UI), 'state.user.name' diyerek isme ulaşabilir.
       state = state.copyWith(user: user);
     } catch (e) {
-      print("Kullanıcı bilgisi yüklenirken hata: $e");
+      debugPrint("Kullanıcı bilgisi yüklenirken hata: $e");
       // Token geçersizse veya internet yoksa burada hata alabiliriz.
       // Şimdilik sadece logluyoruz. İleride burada oturumu kapatabiliriz.
     }

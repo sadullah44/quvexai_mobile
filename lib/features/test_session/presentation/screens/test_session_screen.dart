@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:quvexai_mobile/features/test_session/presentation/providers/test_session_provider.dart';
 import 'package:quvexai_mobile/features/test_session/presentation/providers/test_session_state.dart';
+import 'package:quvexai_mobile/core/widgets/offline_banner_widget.dart';
+import 'package:quvexai_mobile/core/notifications/notification_service.dart';
 
 class TestSessionScreen extends ConsumerStatefulWidget {
   final String testId;
@@ -27,70 +29,165 @@ class _TestSessionScreenState extends ConsumerState<TestSessionScreen> {
     });
   }
 
+  /// 🔥 Mini toast göster
+  void _showMiniToast(String message, {bool isSuccess = true}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 1),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(bottom: 80, left: 16, right: 16),
+        backgroundColor: isSuccess
+            ? Colors.green.shade600
+            : Colors.orange.shade600,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+
+  /// 🔥 Gecikmeli navigasyon (mounted kontrolü ile)
+  void _navigateAfterDelay(String route) {
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
+      context.go(route);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(testSessionProvider);
 
+    // 🔥 Cevap kaydedildi toast'ı
     ref.listen(testSessionProvider, (previous, next) {
-      if (next.status == TestSessionStatus.finished) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Test başarıyla gönderildi! ✅'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        // Sonuç ekranına yönlendir
-        context.go('/test-results/mock-session-123');
+      // Cevap kaydedildiğinde toast göster
+      if (next.lastAnswerSaved != null &&
+          (previous?.lastAnswerSaved == null ||
+              next.lastAnswerSaved != previous?.lastAnswerSaved)) {
+        _showMiniToast("Cevabın kaydedildi ✓");
       }
+
+      // Test bittiğinde
+      if (next.status == TestSessionStatus.finished) {
+        debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        debugPrint("🔍 DEBUG: Test finished!");
+        debugPrint("📝 submitMessage: '${next.submitMessage}'");
+        debugPrint("🌐 isOffline: ${next.isOfflineSubmit}");
+        debugPrint("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+
+        if (next.isOfflineSubmit) {
+          // OFFLINE - Ana sayfaya dön (SnackBar gösterme)
+          // 🔥 Test sonucu hazır bildirimi göster (offline için beklemede)
+          NotificationService.instance.showNotification(
+            title: "Test Kuyruğa Eklendi 📴",
+            body: "İnternet bağlantısı geldiğinde otomatik gönderilecek.",
+            payload: "test_queued:${widget.testId}",
+          );
+          _navigateAfterDelay('/');
+        } else {
+          // ONLINE - Sonuç ekranına git
+          _showResultSnackBar('Test başarıyla gönderildi! ✅', isOffline: false);
+          // 🔥 Test sonucu hazır bildirimi
+          NotificationService.instance.showTestResultReadyNotification(
+            testName: widget.testName,
+            sessionId: 'mock-session-123',
+          );
+          _navigateAfterDelay('/test-results/mock-session-123');
+        }
+      }
+
+      // Hata durumu
       if (next.status == TestSessionStatus.error && next.errorMessage != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.errorMessage!),
-            backgroundColor: Colors.red,
-          ),
+        _showResultSnackBar(
+          next.errorMessage!,
+          isOffline: false,
+          isError: true,
         );
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.testName), centerTitle: true),
-      body: _buildBody(state, context),
+    return PopScope(
+      canPop: state.status != TestSessionStatus.submitting,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop && state.status == TestSessionStatus.submitting) {
+          _showMiniToast(
+            "Test gönderiliyor, lütfen bekleyin...",
+            isSuccess: false,
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.testName),
+          centerTitle: true,
+          leading: state.status == TestSessionStatus.submitting
+              ? null
+              : IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => context.go('/dashboard'),
+                ),
+        ),
+        body: OfflineBannerWidget(child: _buildBody(state, context)),
+      ),
+    );
+  }
+
+  void _showResultSnackBar(
+    String message, {
+    required bool isOffline,
+    bool isError = false,
+  }) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError
+            ? Colors.red
+            : (isOffline ? Colors.orange : Colors.green),
+        duration: const Duration(seconds: 3),
+      ),
     );
   }
 
   Widget _buildBody(TestSessionState state, BuildContext context) {
+    // Loading durumu
     if (state.status == TestSessionStatus.loading ||
         state.status == TestSessionStatus.initial) {
       return const Center(child: CircularProgressIndicator());
     }
 
+    // Error durumu
     if (state.status == TestSessionStatus.error) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, color: Colors.red, size: 60),
-            const SizedBox(height: 16),
-            Text(
-              'Bir hata oluştu:\n${state.errorMessage}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {
-                ref
-                    .read(testSessionProvider.notifier)
-                    .loadQuestions(widget.testId);
-              },
-              icon: const Icon(Icons.refresh),
-              label: const Text("Tekrar Dene"),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 60),
+              const SizedBox(height: 16),
+              Text(
+                state.errorMessage ?? 'Bir hata oluştu',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  ref
+                      .read(testSessionProvider.notifier)
+                      .loadQuestions(widget.testId);
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text("Tekrar Dene"),
+              ),
+            ],
+          ),
         ),
       );
     }
 
+    // Soru yok
     if (state.questions.isEmpty) {
       return const Center(child: Text("Bu testte hiç soru bulunamadı."));
     }
@@ -105,7 +202,7 @@ class _TestSessionScreenState extends ConsumerState<TestSessionScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // --- ÜST KISIM (Sayaç ve Progress) ---
+          // Header
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -124,7 +221,8 @@ class _TestSessionScreenState extends ConsumerState<TestSessionScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          // Animasyonlu Progress Bar
+
+          // Progress bar
           TweenAnimationBuilder<double>(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
@@ -140,14 +238,13 @@ class _TestSessionScreenState extends ConsumerState<TestSessionScreen> {
           ),
           const SizedBox(height: 24),
 
-          // --- SORU KARTI (ANİMASYONLU GEÇİŞ) ---
+          // Question & Answers
           Expanded(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 500),
-              // Geçiş Efekti: Yeni soru sağdan gelir, eski soru sola gider
               transitionBuilder: (Widget child, Animation<double> animation) {
                 final offsetAnimation = Tween<Offset>(
-                  begin: const Offset(0.0, 0.1), // Hafif aşağıdan yukarı
+                  begin: const Offset(0.0, 0.1),
                   end: Offset.zero,
                 ).animate(animation);
                 return FadeTransition(
@@ -158,9 +255,8 @@ class _TestSessionScreenState extends ConsumerState<TestSessionScreen> {
                   ),
                 );
               },
-              // Animasyonun çalışması için her soruya benzersiz bir KEY veriyoruz
               child: KeyedSubtree(
-                key: ValueKey<String>(currentQuestion.id), // <-- KRİTİK NOKTA
+                key: ValueKey<String>(currentQuestion.id),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -171,7 +267,7 @@ class _TestSessionScreenState extends ConsumerState<TestSessionScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // Cevap Seçenekleri
+                    // Answers
                     Expanded(
                       child: ListView.separated(
                         itemCount: currentQuestion.answers.length,
@@ -195,9 +291,7 @@ class _TestSessionScreenState extends ConsumerState<TestSessionScreen> {
                                   },
                             borderRadius: BorderRadius.circular(12),
                             child: AnimatedContainer(
-                              duration: const Duration(
-                                milliseconds: 200,
-                              ), // Seçim animasyonu
+                              duration: const Duration(milliseconds: 200),
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
                                 color: isSelected
@@ -253,8 +347,9 @@ class _TestSessionScreenState extends ConsumerState<TestSessionScreen> {
             ),
           ),
 
-          // --- ALT BUTONLAR ---
           const SizedBox(height: 16),
+
+          // Navigation buttons
           Row(
             children: [
               if (state.currentIndex > 0)
@@ -282,7 +377,16 @@ class _TestSessionScreenState extends ConsumerState<TestSessionScreen> {
               Expanded(
                 child: ElevatedButton.icon(
                   icon: isSubmitting
-                      ? const SizedBox.shrink()
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
                       : Icon(
                           state.currentIndex == totalQuestions - 1
                               ? Icons.check_circle
@@ -295,7 +399,6 @@ class _TestSessionScreenState extends ConsumerState<TestSessionScreen> {
                               ? "Bitir & Gönder"
                               : "İleri"),
                   ),
-
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     backgroundColor:

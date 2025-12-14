@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-// Auth (Giriş) Beynini import ediyoruz (Çıkışı dinlemek için)
 import 'package:quvexai_mobile/features/auth/presentation/providers/auth_provider.dart';
-
-// Sekmelerimizi import ediyoruz
 import 'package:quvexai_mobile/features/dashboard/presentation/tabs/test_list_tab.dart';
 import 'package:quvexai_mobile/features/dashboard/presentation/tabs/profile_tab.dart';
-// Local Notifications
 import 'package:quvexai_mobile/core/notifications/notification_service.dart';
+import 'package:quvexai_mobile/core/sync/sync_service.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -19,21 +15,39 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
-  int _selectedIndex = 0; // 0 = Testler, 1 = Profil
+  int _selectedIndex = 0;
 
-  // Sekme Listesi
   static const List<Widget> _widgetOptions = <Widget>[
-    TestListTab(), // Test Listesi Sekmesi
-    ProfileTab(), // Profil Sekmesi
+    TestListTab(),
+    ProfileTab(),
   ];
 
   @override
   void initState() {
     super.initState();
-    // Testleri burada çekmemize gerek yok,
-    // çünkü 'TestListTab' kendi içinde (initState'inde) zaten çekiyor.
-    // 🔔 Günlük test hatırlatmasını akşam 20:00'a planla
-    NotificationService.instance.scheduleDailyTestReminder(hour: 20, minute: 0);
+    _initNotifications();
+    _checkSyncQueue();
+  }
+
+  Future<void> _initNotifications() async {
+    // Günlük test hatırlatmasını planla
+    final enabled = await NotificationService.instance.isDailyReminderEnabled();
+    if (enabled) {
+      NotificationService.instance.scheduleDailyTestReminder(
+        hour: 20,
+        minute: 0,
+      );
+    }
+  }
+
+  Future<void> _checkSyncQueue() async {
+    // Kuyruk kontrolü
+    final syncService = ref.read(syncServiceProvider);
+    final queueSize = syncService.getQueueSize();
+
+    if (queueSize > 0) {
+      debugPrint("📦 $queueSize test senkronizasyon bekliyor");
+    }
   }
 
   void _onItemTapped(int index) {
@@ -45,27 +59,96 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final titles = ['Testlerim', 'Profil'];
+    final syncService = ref.watch(syncServiceProvider);
+    final queueSize = syncService.getQueueSize();
 
-    // --- ÇIKIŞ DİNLEYİCİSİ ---
-    // Kullanıcı 'Profil' sekmesinden çıkış yaparsa,
-    // token silinir ve bu dinleyici çalışır.
+    // Çıkış dinleyicisi
     ref.listen(authProvider, (previousState, newState) {
       final wasLoggedIn = previousState != null && previousState.token != null;
       final isLoggedOut = newState.token == null;
 
-      // Eğer giriş halinden çıkış haline geçildiyse:
       if (wasLoggedIn && isLoggedOut) {
-        context.go('/login'); // Login ekranına at
+        context.go('/login');
       }
     });
-    // -------------------------
 
     return Scaffold(
-      appBar: AppBar(title: Text(titles[_selectedIndex]), centerTitle: true),
-      // Seçili sekmeyi göster
+      appBar: AppBar(
+        title: Text(titles[_selectedIndex]),
+        centerTitle: true,
+        actions: [
+          // 🔥 Sync durumu göstergesi
+          if (queueSize > 0)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.cloud_upload),
+                    tooltip: 'Bekleyen testler',
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Bekleyen Testler'),
+                          content: Text(
+                            '$queueSize test senkronizasyon bekliyor.\n\n'
+                            'İnternet bağlantısı geldiğinde otomatik olarak gönderilecektir.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              child: const Text('Tamam'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                context.push('/settings');
+                              },
+                              child: const Text('Ayarlar'),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  Positioned(
+                    right: 8,
+                    top: 8,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.orange,
+                        shape: BoxShape.circle,
+                      ),
+                      constraints: const BoxConstraints(
+                        minWidth: 16,
+                        minHeight: 16,
+                      ),
+                      child: Text(
+                        '$queueSize',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          // 🔥 Ayarlar butonu
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Ayarlar',
+            onPressed: () => context.push('/settings'),
+          ),
+        ],
+      ),
       body: IndexedStack(index: _selectedIndex, children: _widgetOptions),
-
-      // Alt Navigasyon Çubuğu
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(

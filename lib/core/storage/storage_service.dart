@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,7 +12,7 @@ class StorageService {
     try {
       await _storage.write(key: _tokenKey, value: token);
     } catch (e) {
-      print('Secure Storage - Token Yazma Hatası: $e');
+      debugPrint('Secure Storage - Token Yazma Hatası: $e');
     }
   }
 
@@ -22,7 +23,7 @@ class StorageService {
       // Değer bulursa 'String' döner, bulamazsa 'null' döner.
       return await _storage.read(key: _tokenKey);
     } catch (e) {
-      print('Secure Storage - Token Okuma Hatası: $e');
+      debugPrint('Secure Storage - Token Okuma Hatası: $e');
       return null;
     }
   }
@@ -32,7 +33,7 @@ class StorageService {
     try {
       await _storage.delete(key: _tokenKey);
     } catch (e) {
-      print('Secure Storage - Token Silme Hatası: $e');
+      debugPrint('Secure Storage - Token Silme Hatası: $e');
     }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:convert'; // JSON çözme (decode) için gerekli
 import 'package:flutter/services.dart'; // 'rootBundle' (asset okuma) için gerekli
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // Riverpod Provider için
@@ -37,7 +38,7 @@ class TestSessionDataSource {
       ).toList(); // '.map' bir 'Iterable' döndürür, '.toList()' ile Listeye çeviririz.
     } catch (e) {
       // Bir hata olursa (dosya bulunamazsa, JSON formatı bozuksa)
-      print('TestSessionDataSource Hata: $e');
+      debugPrint('TestSessionDataSource Hata: $e');
       throw Exception('Test soruları yüklenemedi: $e');
     }
   }

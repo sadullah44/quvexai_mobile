@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'dart:convert'; // JSON çözme (decode) için gerekli
 import 'package:flutter/services.dart'; // 'rootBundle' (asset okuma) için gerekli
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // Riverpod Provider için
@@ -28,7 +29,7 @@ class MockTestDataSource {
         return TestModel.fromJson(item as Map<String, dynamic>);
       }).toList();
     } catch (e) {
-      print('MockTestDataSource Hata: $e');
+      debugPrint('MockTestDataSource Hata: $e');
       throw Exception('Sahte test verisi yüklenemedi: $e');
     }
   }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -25,7 +26,7 @@ class TestSessionLocalDataSource {
     // 3. Güncellenmiş haritayı tekrar kutuya koy
     await box.put(testId, currentAnswers);
 
-    print("💾 Cevap kaydedildi: $questionId -> $answerId (Test: $testId)");
+    debugPrint("💾 Cevap kaydedildi: $questionId -> $answerId (Test: $testId)");
   }
 
   /// [getSavedAnswers] - Bir test için kaydedilmiş tüm cevapları getirir.
@@ -38,7 +39,7 @@ class TestSessionLocalDataSource {
   Future<void> clearSession(String testId) async {
     final box = Hive.box<Map>(_boxName);
     await box.delete(testId);
-    print("🗑️ Oturum temizlendi: $testId");
+    debugPrint("🗑️ Oturum temizlendi: $testId");
   }
 }
 

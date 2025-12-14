@@ -40,7 +40,9 @@ class _AppStartListenerState extends State<AppStartListener> {
     // 4. 🔥 UYGULAMA AÇIKKEN (FOREGROUND) BİLDİRİM GELDİĞİNDE 🔥
     // Sorunun çözümü burasıdır.
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print("📩 Foreground bildirim geldi: ${message.notification?.title}");
+      debugPrint(
+        "📩 Foreground bildirim geldi: ${message.notification?.title}",
+      );
 
       // Eğer gelen mesajın bir "Notification" başlığı varsa
       if (message.notification != null) {
@@ -57,7 +59,7 @@ class _AppStartListenerState extends State<AppStartListener> {
 
   // Yönlendirme Mantığı (Kod tekrarını önlemek için ayırdık)
   void _handleRedirect(RemoteMessage message) {
-    print("👉 Bildirim yönlendirmesi: ${message.data}");
+    debugPrint("👉 Bildirim yönlendirmesi: ${message.data}");
     final type = message.data["type"];
 
     if (type == "daily_reminder") {
